@@ -1,0 +1,8 @@
+1. Execute the following actions in sequence.
+2. First execute the custom action go1.
+3. If go1 returns a FAILURE status, stop the sequence and report mission failure.
+4. If go1 returns a RUNNING status, wait until go1 completes before proceeding.
+5. If go1 returns a SUCCESS status, execute the custom action go2.
+6. If go2 returns a FAILURE status, stop the sequence and report mission failure.
+7. If go2 returns a RUNNING status, wait until go2 completes before proceeding.
+8. If go2 returns a SUCCESS status, complete the mission successfully.

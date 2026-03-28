@@ -1,0 +1,282 @@
+[System message]
+You are an expert systems engineer specialized in converting behavioral models into mission requirements. 
+I will provide you with a behavior tree that describes real-world system behavior. Format the outputted system-level 
+mission requirements as a numbered list. Do keep your answer as simple text with a mix of imperative and descriptive language. 
+Use the dictionary provided, as a reference to interpret behavior control of the corresponding node types. Use the example provided as a
+reference to the output format desired.
+
+[Prompt messages]
+Your task is to generate system-level mission requirements that strictly satisfy the following constraints:
+atomic - each requirement statement must express a single, indivisible capability, constraint, or characteristic that can be independently verified and tested,
+unambiguous - each requirement statement can only be interpreted in one way,
+complete - each requirement statement must be able to stand alone without missing conditions or assumptions,
+usable - all requirements statements can be collectively used by specified users to achieve specified goals with effectiveness, efficiency and satisfaction in a specified context,
+consistent - requirements statements do not contradict each other.
+At the end of your response, briefly verify each constraint by explicitly stating Pass/Fail with a brief justification.
+
+[Chat prompt]
+Dictionary:
+<<<BEGIN_DICTIONARY>>>
+{
+  "title": "Dictionary for Interpreting Behavior Control and Modification",
+  "nodes": [
+    {
+      "nodeType": "Sequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] returns a FAILURE status, stop the sequence. If [Action] returns a RUNNING status, wait for [Action] to finish. Else move to the next [Action]."
+    },
+    {
+      "nodeType": "SequenceWithMemory, SequenceStar",
+      "naturalLanguageDescription": "Execute a series of child nodes in order, from left to right, remembering which ones have already succeeded.",
+      "behaviorTemplate": "Execute [Actions] in sequence. If [action] returns a SUCCESS status, remember it and move to the next. If [Action] returns a FAILURE status, start the sequence again from the beginning."
+    },
+    {
+      "nodeType": "Switch",
+      "naturalLanguageDescription": "Execute child node based on blackboard value.",
+      "behaviorTemplate": "Read blackboard value. Compare value against a set of cases. If case value matches switch value execute corresponding [Action]. Else if no case matches, execute default [Action]."
+    },
+    {
+      "nodeType": "WhileDoElse",
+      "naturalLanguageDescription": "Execute a node while a condition is true else execute and alternative node if that same condition fails.",
+      "behaviorTemplate": "While [Condition], do [Action]. If [!Condition], execute alternative [Action]."
+    },
+    {
+      "nodeType": "Loop",
+      "naturalLanguageDescription": "Repeatedly execute a child node for a specified number of iterations, until a specific status is returned or forever.",
+      "behaviorTemplate": "Execute [Action] continuously until a FAILURE status or SUCCESS status is returned. Else return a RUNNING status and keep executing [Action] forever."
+    },
+    {
+      "nodeType": "Parallel",
+      "naturalLanguageDescription": "Execute multiple child nodes simultaneously, ensuring all are completed successfully.",
+      "behaviorTemplate": "Execute a series of [Actions] simultaneously. If a success threshold is reached, return a SUCCESS status. Else if a failure threshold is reached, return a FAILURE status. Else return a RUNNING status."
+    },
+    {
+      "nodeType": "Fallback",
+      "naturalLanguageDescription": "Execute child nodes sequentially from left to right, until one succeeds or all fail.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] returns a FAILURE status, move to the next [Action] until any [Action] returns a SUCCESS status. If no [Action] returns a SUCCESS status, return a FAILURE status."
+    },
+    {
+      "nodeType": "ForceSuccess",
+      "naturalLanguageDescription": "Force child node to succeed regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always returns a SUCCESS status, unless the [Action] is returning a RUNNING status."
+    },
+    {
+      "nodeType": "ForceFailure",
+      "naturalLanguageDescription": "Force child node to fail regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always returns a FAILURE status when it is complete."
+    },
+    {
+      "nodeType": "RepeatUntilSuccess",
+      "naturalLanguageDescription": "Repeatedly execute child node until success is achieved.",
+      "behaviorTemplate": "Continuously execute [Action] until it succeeds. Then stop [Action] execution and return a SUCCESS status."
+    },
+    {
+      "nodeType": "Retry",
+      "naturalLanguageDescription": "Retry the execution of a child node for either a fixed number of times or until the node is executed successfully.",
+      "behaviorTemplate": "Continuously execute [Action] whenever it returns a FAILURE status. Repeat for a specified retry count or until a SUCCESS status is returned."
+    },
+    {
+      "nodeType": "ReactiveSequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, re-evaluate previous child nodes.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] returns a SUCCESS status, move to the next. If [Action] returns a FAILURE status, stop. If [Action] returns a RUNNING status, re-evaluate previous [Actions] in order."
+    },
+    {
+      "nodeType": "ReactiveFallback",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, restart evaluation from node 0.",
+      "behaviorTemplate": "Execute a series of [Actions] in order. If [Action] returns a SUCCESS status, stop execution. Else keep returning a RUNNING status and re-evaluate previous [Actions] in order, whenever an [Action] is in execution."
+    },
+    {
+      "nodeType": "Repeat",
+      "naturalLanguageDescription": "Execute a set of child nodes multiple times.",
+      "behaviorTemplate": "Execute [Action] a set number of times or infinitely."
+    },
+    {
+      "nodeType": "BlackboardCheckValue",
+      "naturalLanguageDescription": "Check if a value in memory can be either true or false matches the expected value.",
+      "behaviorTemplate": "Look up a value in the blackboard. If the value matches target, return a SUCCESS status. Else return a FAILURE status. If the blackboard does not have the required key, return a FAILURE status."
+    },
+    {
+      "nodeType": "Delay",
+      "naturalLanguageDescription": "Wait for a given duration before running or returning a result from the associated child node.",
+      "behaviorTemplate": "Execute [Action]. If the [Action] returns a SUCCESS status, start delay timer. While delay is active, return a RUNNING status. After delay is exhausted, return a SUCCESS status."
+    },
+    {
+      "nodeType": "Inverter",
+      "naturalLanguageDescription": "Negate a condition.",
+      "behaviorTemplate": "Execute an [Action]. If [Action] returns either a SUCCESS or a FAILURE status return the reverse. Else return a RUNNING status."
+    },
+    {
+      "nodeType": "KeepRunningUntilFailure",
+      "naturalLanguageDescription": "Keep re-running child node as long as it does not fail.",
+      "behaviorTemplate": "Execute [Action]. If [Action] returns a SUCCESS status, restart it and keep running. Else if [Action] returns a FAILURE status, stop looping and return a SUCCESS status. Else return a RUNNING status."
+    },
+    {
+      "nodeType": "RetryUntilSuccessful",
+      "naturalLanguageDescription": "Continuously retry a child node until it succeeds.",
+      "behaviorTemplate": "Keep executing [Action] until it returns a SUCCESS status. If retry returns a FAILURE status, restart [Action]. Else return a RUNNING status."
+    },
+    {
+      "nodeType": "Timeout",
+      "naturalLanguageDescription": "Execute child node, but only for a maximum duration.",
+      "behaviorTemplate": "If the execution of [Action] does not end within a specified duration, interrupt it and return a specific result."
+    },
+    {
+      "nodeType": "[Action]",
+      "naturalLanguageDescription": "A child node name",
+      "behaviorTemplate": "If action name is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Actions]",
+      "naturalLanguageDescription": "A series of child node names",
+      "behaviorTemplate": "For each action name, if it is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Condition]",
+      "naturalLanguageDescription": "A check that returns success",
+      "behaviorTemplate": "[condition ID] is true"
+    },
+    {
+      "nodeType": "[!Condition]",
+      "naturalLanguageDescription": "A check that returns failure",
+      "behaviorTemplate": "[condition ID] is false"
+    }
+  ]
+}
+<<<END_DICTIONARY>>>
+Example:
+<<<BEGIN_EXAMPLE>>>
+<?xml version="1.0"?>
+<root main_tree_to_execute="SayStuff">
+    <TreeNodesModel>
+        <Action ID="SaySomething"/>
+        <Action ID="SayHello"/>
+        <Control ID="SequenceStar"/>
+    </TreeNodesModel>
+    <BehaviorTree ID="SayStuff">
+        <SequenceStar>
+            <Action ID="SaySomething"/>
+            <Action ID="SayHello"/>
+        </SequenceStar>
+    </BehaviorTree>
+</root>
+
+1. Execute the following actions in sequence 
+2. First execute the custom action SaySomething.
+3. If custom action SaySomething returns SUCCESS, remember it and execute the custom action SayHello.
+4. If SaySomething returns FAILURE, restart the sequence from the beginning.
+5. If SayHello returns SUCCESS after SaySomething succeeds, remember it and complete the mission.
+6. If SayHello returns FAILURE, restart the entire sequence from SaySomething again.
+<<<END_EXAMPLE>>>
+Behavior Tree:
+<<<BEGIN_BEHAVIOR_TREE>>>
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Fallback>
+            <ReactiveSequence>
+                <Condition ID="PullOver_Request"/>
+                <Condition ID="PullOver_Ready"/>
+                <Action ID="PullOver_Plan" output="{output}"/>
+            </ReactiveSequence>
+            <ReactiveSequence>
+                <Condition ID="PullOut_Request"/>
+                <Condition ID="PullOut_Ready"/>
+                <Action ID="PullOut_Plan" output="{output}"/>
+            </ReactiveSequence>
+            <ReactiveSequence>
+                <Condition ID="SideShift_Request"/>
+                <Condition ID="SideShift_Ready"/>
+                <Action ID="SideShift_Plan" output="{output}"/>
+            </ReactiveSequence>
+            <ReactiveSequence>
+                <Condition ID="LaneChange_Request"/>
+                <Fallback>
+                    <Condition ID="LaneChange_Ready"/>
+                    <Condition ID="ForceLaneChange_ForceApproval"/>
+                </Fallback>
+                <Action ID="LaneChange_Plan" output="{output}"/>
+            </ReactiveSequence>
+            <ReactiveSequence>
+                <Condition ID="Avoidance_Request"/>
+                <Condition ID="Avoidance_Ready"/>
+                <Action ID="Avoidance_Plan" output="{output}"/>
+            </ReactiveSequence>
+            <Action ID="LaneFollowing_Plan" output="{output}"/>
+        </Fallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="a">
+        <ReactiveFallback>
+            <Condition ID="LaneChange_CheckApproval"/>
+            <KeepRunningUntilFailure>
+                <Action ID="LaneChange_PlanCandidate" output="{output}"/>
+            </KeepRunningUntilFailure>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="b">
+        <ReactiveFallback>
+            <Condition ID="Avoidance_CheckApproval"/>
+            <KeepRunningUntilFailure>
+                <Action ID="Avoidance_PlanCandidate" output="{output}"/>
+            </KeepRunningUntilFailure>
+        </ReactiveFallback>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Condition ID="Avoidance_CheckApproval"/>
+        <Action ID="Avoidance_Plan">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Action ID="Avoidance_PlanCandidate">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Condition ID="Avoidance_Ready"/>
+        <Condition ID="Avoidance_Request"/>
+        <Condition ID="ExternalApproval"/>
+        <Condition ID="ForceApproval"/>
+        <Condition ID="ForceLaneChange_ForceApproval"/>
+        <Condition ID="LaneChange_CheckApproval"/>
+        <Action ID="LaneChange_Plan">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Action ID="LaneChange_PlanCandidate">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Condition ID="LaneChange_Ready"/>
+        <Condition ID="LaneChange_Request"/>
+        <Action ID="LaneFollowing_Plan">
+            <output_port name="output" type="boost::optional&lt;tier4_planning_msgs::PathWithLaneId_&lt;std::allocator&lt;void&gt; &gt; &gt;">desc</output_port>
+        </Action>
+        <Action ID="LaneFollowing_PlanCandidate">
+            <output_port name="output_candidate" type="boost::optional&lt;tier4_planning_msgs::PathWithLaneId_&lt;std::allocator&lt;void&gt; &gt; &gt;">desc</output_port>
+        </Action>
+        <Condition ID="LaneFollowing_Ready"/>
+        <Condition ID="LaneFollowing_Request"/>
+        <Action ID="PullOut_Plan">
+            <output_port name="output"/>
+        </Action>
+        <Condition ID="PullOut_Ready"/>
+        <Condition ID="PullOut_Request"/>
+        <Action ID="PullOver_Plan">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Condition ID="PullOver_Ready"/>
+        <Condition ID="PullOver_Request"/>
+        <Condition ID="SideShift_CheckApproval"/>
+        <Action ID="SideShift_Plan">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Action ID="SideShift_PlanCandidate">
+            <output_port name="output" type="behavior_path_planner::BehaviorModuleOutput">desc</output_port>
+        </Action>
+        <Condition ID="SideShift_Ready"/>
+        <Condition ID="SideShift_Request"/>
+        <SubTree ID="SubTree"/>
+        <SubTree ID="a"/>
+        <SubTree ID="b"/>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+<<<END_BEHAVIOR_TREE>>>

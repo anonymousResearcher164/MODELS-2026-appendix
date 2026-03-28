@@ -1,0 +1,109 @@
+1. Mission Supervisor – Core Fallback
+Node Logic: Fallback → execute child sub‑sequences until one succeeds.
+
+R1 – Mission Wait Guard
+The vehicle shall first evaluate the checkMissionWait condition; if true, it shall execute a stop action and report a waiting state.
+
+R2 – Navigation Execution Fallback
+If the waiting condition fails, the system shall execute the main navigation and planning sequence described below.
+
+2. Initialization and Global Path
+Node Logic: Outer Sequence (init block) executes ordered steps.
+
+R3 – Global Path Availability Check
+The system shall verify the existence of a valid global path by running checkExistPathGlobal before any local path generation.
+
+R4 – Global Path Recovery
+If no path exists, the system shall attempt to regenerate it:
+  • Confirm the current state is LaneKeeping and that lane change has not failed.
+  • Execute callPathGlobal to request a new global path.
+If that fails, the fallback yields SUCCESS to continue initialisation.
+
+R5 – Planner Initialisation
+The vehicle shall run init to initialize motion‑planning parameters and control modules before path generation.
+
+3. Local Path Generation – State Selection
+This block is implemented by a Fallback (StateSelect) containing sub‑sequences.
+Each sequence corresponds to a driving state.
+
+3.1 Lane Keeping Path Generation
+R6 – Lane‑Keeping Mode
+If checkStateLaneKeeping is true, the vehicle shall generate a lane‑keeping path via genPathLaneKeeping.
+
+R7 – Opportunistic Lane‑Change Evaluation
+During lane‑keeping, the system shall check if a global lane‑change opportunity exists (checkGlobalLaneChange) and select left or right sequences as follows:
+
+Left Change Path (LaneChangeableLeft): generate a left‑lane path (genPathLaneChangeLeft).
+Right Change Path (LaneChangeableRight): generate a right‑lane path (genPathLaneChangeRight). If either lane‑change action fails or detects dynamic obstacles, revert to LaneKeeping using setStateLaneKeeping.
+R8 – Safety Condition Validation
+When evaluating a lane‑change, the vehicle shall ensure both static and dynamic safety using:
+  • checkObjectStaticLeft/RightLane, and
+  • checkCollisionBehindLeft/Right.
+Only if all safety checks succeed may a lane‑change state (setStateLaneChangeLeft/Right) be set; otherwise revert to LaneKeeping.
+
+3.2 Collision Response and Decision
+Node Logic: nested Fallback and Sequence handling front‑object logic.
+
+R9 – Front‑Object Assessment
+The vehicle shall check for a Front Object using checkFrontObject; if none, continue normal lane‑keeping.
+
+R10 – Irregular and Near‑Goal Handling
+If an irregular front object, corner, or goal proximity is detected, maintain lane‑keeping state.
+Conditions include:
+  – checkIrregularFront (negated by inverter),
+  – checkNearCorner,
+  – checkObjectNearGoal,
+  – checkMeNearGoal.
+
+R11 – Lane‑Change Profitability
+If a front object is detected, evaluate whether a lane‑change provides benefit through checkProfitLaneChangeLeft/Right.
+Execute the corresponding lane‑change path generation only if:
+  • The target lane is changeable,
+  • No static obstacles or rear collisions are found.
+Otherwise revert to LaneKeeping.
+
+3.3 Lane Change State Execution and Recovery
+Node Logic: Sequence per lane‑change direction.
+
+R12 – Lane‑Change Left Control
+When checkStateLaneChangeLeft is TRUE, perform:
+  a) If lane‑change ended (checkEndLaneChange), set state to LaneKeeping and recalculates the global path.
+  b) Otherwise execute speedProfileLaneChange to maintain safe speed.
+
+R13 – Lane‑Change Right Control (symmetrical to R12).
+
+R14 – Recovery Mode
+If other state checks fail, enforce LaneKeeping state using setStateLaneKeeping.
+
+4. External Control and Environment Checks
+R15 – Traffic‑Light Compliance
+If at a traffic light, check checkPassAbleTrafficLight; if not passable, perform stopTrafficLight action until passable.
+
+R16 – Unprotected Turn Safety
+When entering an unprotected intersection (checkUnprotected = TRUE), evaluate checkImpassalbeUnprotected; if impassable, execute stop and wait until safe.
+
+5. Path Publication and Mission State Management
+After path generation succeeds, final actions are executed sequentially.
+
+R17 – Path Output
+Execute setPath to store generated path into global control memory.
+
+R18 – Telemetry Publication
+Run publishData to publish updated planning and perception results to the system network.
+
+R19 – Mission‑State Update Fallback
+Evaluate mission termination:
+
+If checkArriveGoal = TRUE, set state to MissionArrive then publish via publishStateMission.
+Else set mission state to MissionGoing.
+✅ Validation Checks
+Criterion	Description	Result
+Atomicity	Each R‑item addresses a single aspect – initialisation, path generation, lane‑change, or mission state.	✔
+Ambiguity	Each refers to explicit BT conditions/actions and outcomes (SUCCESS, FAILURE).	✔
+Completeness	All major control phases in the XML (mission wait, init, path planning, traffic handling, mission update) covered.	✔
+Usability	Requirements collectively form an implementable rule base for an autonomous vehicle mission controller.	✔
+Consistency	All rules follow BT semantics: Sequence → ordered execution with stop‑on‑fail; Fallback → try next on fail; Inverter → reverse result.	✔
+✅ Summary
+Requirements R1 – R19 describe the complete mission control behaviour of the autonomous vehicle:
+from mission‑start waiting, through initialization, dynamic path generation and lane handling, safety and traffic checks, to final mission‑state publication.
+They are atomic, unambiguous, complete, usable, and consistent relative to the dictionary semantics.

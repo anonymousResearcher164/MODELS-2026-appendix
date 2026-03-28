@@ -1,0 +1,19 @@
+The mission describes a reactive obstacle-traversal strategy that selects among three motion goal settings based on 
+end-effector thresholds.
+
+First, the robot will execute the following actions (EEYThreshold, SetMGGoal) in sequence. It will find a value 
+on the blackboard and check if it matches a given rule for the end-effector Y threshold. If the end-effector Y 
+threshold is true, it will use the custom action SetMGGoal with parameters mp_param_x set to mp_3_x and mg_trans_x 
+set to mg_trans_x. If the end-effector Y threshold is false while SetMGGoal is running, it will re-evaluate the 
+threshold before continuing.
+
+Next, it will execute the following actions (EEZThreshold, SetMGGoal) in sequence. It will find a value on the 
+blackboard and check if it matches a given rule for the end-effector Z threshold. If the end-effector Z threshold 
+is true, it will use the custom action SetMGGoal with parameters mp_param_x set to mp_2_x and mg_trans_x set to 
+mg_trans_x. If the end-effector Z threshold is false while SetMGGoal is running, it will re-evaluate the threshold 
+before continuing.
+
+Finally, it will execute the following actions (3-goal, 2-traverse, SetMGGoal) in order. If any action succeeds, 
+it will stop execution. Else it will keep executing and re-evaluating previous actions whenever an action is running. 
+It will use the custom action SetMGGoal with parameters mp_param_x set to mp_1_x and mg_trans_x set to mg_trans_x when 
+both earlier actions do not succeed.

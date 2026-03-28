@@ -1,0 +1,17 @@
+The mission describes a parallel search-and-approach behavior that will recognize people, estimate a 
+specific person’s pose, and reposition if the estimate fails while continuously updating a variant value.
+
+First, it will execute the following actions (Repeat, Sequence) simultaneously, and the execution will 
+be successful if all actions succeed; if any action fails, the execution will fail.
+
+Next, it will execute the custom action VariantAction for a set number of times or infinitely, and it 
+will run infinitely because the repeat count is set to negative one.
+
+Next, it will execute the following actions (peoplerecognition, Fallback) in order and stop the sequence 
+if any action fails.
+
+Next, it will execute the ROS action peoplerecognition.
+
+Finally, it will execute the following actions (getPersonPose, moveRoboterPosition) consecutively and 
+will move to the next action if the first fails until one action succeeds; if no action succeeds, the 
+execution will fail.

@@ -1,0 +1,51 @@
+1. Execute the following mission behaviors in fallback order: PullOver, PullOut, SideShift, LaneChange, Avoidance, and LaneFollowing.
+2. If any behavior sequence succeeds, stop evaluating further behaviors and return SUCCESS.
+3. If all behavior sequences fail, return FAILURE.
+
+PullOver Behavior Sequence
+4. Continuously evaluate the conditions PullOver_Request and PullOver_Ready in order.
+5. If both PullOver_Request and PullOver_Ready are true, execute the custom action PullOver_Plan to generate a behavior path plan output.
+6. If PullOver_Plan returns SUCCESS, complete the mission with the generated output.
+7. If any condition or action in the PullOver sequence fails, stop and proceed to the next fallback behavior.
+
+PullOut Behavior Sequence
+8. Continuously evaluate the conditions PullOut_Request and PullOut_Ready in order.
+9. If both PullOut_Request and PullOut_Ready are true, execute the custom action PullOut_Plan to generate a behavior path plan output.
+10. If PullOut_Plan returns SUCCESS, complete the mission with the generated output.
+11. If any condition or action in the PullOut sequence fails, stop and proceed to the next fallback behavior.
+
+SideShift Behavior Sequence
+12. Continuously evaluate the conditions SideShift_Request and SideShift_Ready in order.
+13. If both SideShift_Request and SideShift_Ready are true, execute the custom action SideShift_Plan to generate a behavior path plan output.
+14. If SideShift_Plan returns SUCCESS, complete the mission with the generated output.
+15. If any condition or action in the SideShift sequence fails, stop and proceed to the next fallback behavior.
+
+LaneChange Behavior Sequence
+16. Continuously evaluate the condition LaneChange_Request.
+17. If LaneChange_Request is true, evaluate the fallback condition group consisting of LaneChange_Ready and ForceLaneChange_ForceApproval.
+18. If either LaneChange_Ready or ForceLaneChange_ForceApproval is true, execute the custom action LaneChange_Plan to generate a behavior path plan output.
+19. If LaneChange_Plan returns SUCCESS, complete the mission with the generated output.
+20. If all conditions or actions in the LaneChange sequence fail, stop and proceed to the next fallback behavior.
+
+Avoidance Behavior Sequence
+21. Continuously evaluate the conditions Avoidance_Request and Avoidance_Ready in order.
+22. If both Avoidance_Request and Avoidance_Ready are true, execute the custom action Avoidance_Plan to generate a behavior path plan output.
+23. If Avoidance_Plan returns SUCCESS, complete the mission with the generated output.
+24. If any condition or action in the Avoidance sequence fails, stop and proceed to the next fallback behavior.
+
+LaneFollowing Behavior
+25. If all previous fallback behaviors fail, execute the custom action LaneFollowing_Plan to generate a lane-following path output.
+26. If LaneFollowing_Plan returns SUCCESS, complete the mission with the generated output.
+27. If LaneFollowing_Plan returns FAILURE, return overall mission FAILURE.
+
+Subtree a (LaneChange Candidate Planning)
+28. Continuously evaluate the condition LaneChange_CheckApproval.
+29. If LaneChange_CheckApproval is false, repeatedly execute the custom action LaneChange_PlanCandidate until it fails.
+30. If LaneChange_PlanCandidate fails, stop execution and return SUCCESS.
+31. If LaneChange_CheckApproval becomes true, stop executing LaneChange_PlanCandidate and return SUCCESS.
+
+Subtree b (Avoidance Candidate Planning)
+32. Continuously evaluate the condition Avoidance_CheckApproval.
+33. If Avoidance_CheckApproval is false, repeatedly execute the custom action Avoidance_PlanCandidate until it fails.
+34. If Avoidance_PlanCandidate fails, stop execution and return SUCCESS.
+35. If Avoidance_CheckApproval becomes true, stop executing Avoidance_PlanCandidate and return SUCCESS.

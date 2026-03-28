@@ -1,0 +1,115 @@
+R1 — Navigation Recovery Framework
+The robot shall execute the main navigation task within a RecoveryNode construct named NavigateRecovery that allows up to six retry attempts before final failure is declared.
+Code Reference: <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+
+R2 — Sequential Pipeline for Navigation
+The robot shall execute a PipelineSequence named NavigateWithReplanning that runs its child behaviors in an ordered pipeline pattern to complete the navigation task.
+Code Reference: <PipelineSequence name="NavigateWithReplanning">
+
+R3 — Compute Path Rate Control
+The system shall run the path computation stage under a RateController named ComputePathToPose operating at 1 Hz.
+Code Reference:
+<RateController hz="1.0">
+
+R4 — Compute Path to Pose
+The robot shall compute a path to the specified goal {goal} and store the planned trajectory in {path} using the GridBased planner.
+Execution retries for this action are limited to one attempt inside its parent RecoveryNode.
+Code Reference:
+
+<RecoveryNode number_of_retries="1" name="ComputePathToPose">
+   <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+</RecoveryNode>
+
+R5 — Compute Path Recovery Logic
+If computing the path fails, the robot shall trigger a ReactiveFallback named ComputePathToPoseRecoveryFallback that performs the following actions in order:
+
+Check for an updated goal by executing GoalUpdated.
+If goal not updated or still failing, clear the global costmap by calling the service global_costmap/clear_entirely_global_costmap.
+Code Reference:
+<ReactiveFallback name="ComputePathToPoseRecoveryFallback">
+   <GoalUpdated/>
+   <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+</ReactiveFallback>
+
+R6 — Follow Path Execution
+The robot shall execute the FollowPath behavior using the computed {path} and controller identifier FollowPath.
+This action shall be retried once within its parent RecoveryNode upon failure.
+Code Reference:
+<RecoveryNode number_of_retries="1" name="FollowPath">
+   <FollowPath path="{path}" controller_id="FollowPath"/>
+</RecoveryNode>
+
+R7 — Follow Path Recovery Fallback
+If the FollowPath behavior fails, the robot shall execute the ReactiveFallback FollowPathRecoveryFallback, which:
+Checks for an updated goal via GoalUpdated.
+If the goal is unchanged or error persists, clears the local costmap through the service local_costmap/clear_entirely_local_costmap.
+
+Code Reference:
+<ReactiveFallback name="FollowPathRecoveryFallback">
+   <GoalUpdated/>
+   <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+</ReactiveFallback>
+
+R8 — Navigation Recovery Strategy
+If the main NavigateWithReplanning pipeline fails after six attempts, the system shall activate RecoveryFallback which performs reactive recovery actions as long as failure persists.
+Code Reference: <ReactiveFallback name="RecoveryFallback">
+
+R9 — Goal Verification under RecoveryFallback
+Within RecoveryFallback, the robot shall first check for a new goal via the GoalUpdated action before performing recovery maneuvers.
+Code Reference: <GoalUpdated/>
+
+R10 — Recovery Action Selection
+The robot shall execute recovery actions under a RoundRobin selection node called RecoveryActions, cycling through available recovery actions to attempt system restoration.
+Code Reference: <RoundRobin name="RecoveryActions">
+
+R11 — Clearing Actions Sequence
+The robot shall execute ClearingActions as a two-step Sequence:
+
+Clear the local costmap (local_costmap/clear_entirely_local_costmap).
+Then clear the global costmap (global_costmap/clear_entirely_global_costmap). If either clearing action fails, the sequence stops and recovery proceeds to the next RoundRobin entry. 
+Code Reference:
+<Sequence name="ClearingActions">
+   <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+   <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+</Sequence>
+
+R12 — Spin Recovery Action
+The robot shall execute a Spin action rotating by 1.57 radians when selected by the RoundRobin recovery policy.
+Code Reference: <Spin spin_dist="1.57"/>
+
+R13 — Wait Recovery Action
+The system shall perform a waiting action lasting 5 seconds when selected by the RoundRobin recovery policy.
+Code Reference: <Wait wait_duration="5"/>
+
+R14 — Backup Recovery Action
+When selected, the robot shall move backward by 0.15 m at a speed of 0.025 m/s as a BackUp recovery maneuver.
+Code Reference: <BackUp backup_dist="0.15" backup_speed="0.025"/>
+
+✅ VALIDATION CHECKS
+Atomicity Check
+Each requirement (R1–R14) addresses exactly one atomic behavior element—action logic, sequence logic, or parameter constraint.
+Result: ✔ Atomic.
+
+Ambiguity Check
+All requirements use exact parameter values, explicit node names, and unambiguous verbs (“shall compute”, “shall clear”, “shall spin”).
+Result: ✔ Unambiguous.
+
+Completeness Check
+All behaviors present in the tree are represented:
+
+Main recovery framework,
+Navigation pipeline,
+Compute and follow path logic,
+RecoveryFallback and subactions. 
+Result: ✔ Complete.
+
+Usability Check
+These requirements provide developers and mission designers with a direct and traceable specification from which to implement motion, control, and recovery logic on real robotic platforms.
+Result: ✔ Usable.
+
+Consistency Check
+No requirement contradicts another; retry counts, fallbacks, and sequences comply with the dictionary’s definitions.
+Result: ✔ Consistent.
+
+✅ Summary:
+The final set (R1–R14) forms a traceable, implementable, and validated system-level requirements baseline extracted from the given navigation behavior tree and behavior dictionary.

@@ -1,0 +1,8 @@
+1. Execute the following actions in sequence.
+2. First, evaluate the condition isFull.
+3. If isFull is true, proceed to execute the custom action goClosestR.
+4. If isFull is false, stop the sequence and return a FAILURE status.
+5. After goClosestR returns a SUCCESS status, execute the custom action waitFrames with the parameter frames = 15.
+6. While waitFrames is executing, wait until the action completes before proceeding.
+7. If waitFrames returns a SUCCESS status, complete the sequence successfully.
+8. If any action in the sequence returns a FAILURE status, stop the sequence immediately and return a FAILURE status.

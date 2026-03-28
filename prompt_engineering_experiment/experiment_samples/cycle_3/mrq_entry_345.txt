@@ -1,0 +1,15 @@
+1. Execute the following actions in sequence.
+2. Execute the custom action GetArmJointsForPose with parameter pose = "UPTRAY" to retrieve the joint configuration for the UPTRAY position and store it in {joints_pose}.
+3. Execute the custom action SetArmJointsLeft using {joints_pose} to move the left arm to the UPTRAY position.
+4. Execute the custom action SetArmJointsRight using {joints_pose} to move the right arm to the UPTRAY position.
+5. Execute the custom action GetArmJointsForPose with parameter pose = "EXTENDED" to retrieve the joint configuration for the EXTENDED position and store it in {joints_pose}.
+6. Execute the custom action SetArmJointsLeft using {joints_pose} to move the left arm to the EXTENDED position.
+7. Execute the custom action SetArmJointsRight using {joints_pose} to move the right arm to the EXTENDED position.
+8. Execute the custom action GetArmJointsForPose with parameter pose = "GRIPPING" to retrieve the joint configuration for the GRIPPING position and store it in {joints_pose}.
+9. Execute the custom action SetArmJointsLeft using {joints_pose} to move the left arm to the GRIPPING position.
+10. Execute the custom action SetArmJointsRight using {joints_pose} to move the right arm to the GRIPPING position.
+11. Execute the custom action GetArmJointsForPose with parameter pose = "REST" to retrieve the joint configuration for the REST position and store it in {joints_pose}.
+12. Execute the custom action SetArmJointsLeft using {joints_pose} to move the left arm to the REST position.
+13. Execute the custom action SetArmJointsRight using {joints_pose} to move the right arm to the REST position.
+14. If any action in the sequence returns a FAILURE status, stop the sequence immediately and return a FAILURE status.
+15. If all actions return SUCCESS, complete the sequence successfully.

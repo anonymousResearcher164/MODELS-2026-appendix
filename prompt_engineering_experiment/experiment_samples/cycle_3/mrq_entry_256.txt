@@ -1,0 +1,15 @@
+1. Execute the following sequence of actions repeatedly for the number of cycles specified by num_cycles.
+2. Begin each cycle by executing the custom action LTLPreCheck.
+3. The system shall provide the inputs ltl_state_current and ltl_state_desired_sequence to LTLPreCheck.
+4. If LTLPreCheck returns a SUCCESS status, proceed to execute the next action in the sequence.
+5. If LTLPreCheck returns a FAILURE status, terminate the current sequence execution for that cycle.
+6. After LTLPreCheck succeeds, execute the custom action MoveAction.
+7. The system shall provide the inputs move_base_finished, move_base_idle, and nav_goal to MoveAction, and receive the output action.
+8. If MoveAction returns a SUCCESS status, proceed to execute the next action in the sequence.
+9. If MoveAction returns a FAILURE status, terminate the current sequence execution for that cycle.
+10. After MoveAction succeeds, execute the custom action UpdateLTL.
+11. The system shall provide and update the inout ports action_sequence and ltl_state_desired_sequence, and receive the output nav_goal from UpdateLTL.
+12. If UpdateLTL returns a SUCCESS status, mark the sequence as successfully completed for that cycle.
+13. If UpdateLTL returns a FAILURE status, terminate the current sequence execution for that cycle.
+14. After the sequence completes successfully, repeat the entire sequence starting again with LTLPreCheck until the number of cycles specified by num_cycles is reached.
+15. When the number of cycles equals num_cycles, stop repeating and return a SUCCESS status for the overall mission.

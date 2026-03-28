@@ -1,0 +1,13 @@
+The behavior tree describes a coordinated two-arm motion sequence that will move both arms through predefined 
+poses from start to finish. The robot will execute actions in order and will stop the Sequence if any action 
+fails. The robot will run the custom action GetArmJointsForPose with pose UPTRAY to compute a joints_pose. The 
+robot will then execute a Parallel that will run the custom actions SetArmJointsLeft and SetArmJointsRight 
+simultaneously with a success threshold requiring both actions to succeed. The robot will run the custom action 
+GetArmJointsForPose with pose EXTENDED to compute a joints_pose. The robot will then execute a Parallel that will 
+run the custom actions SetArmJointsLeft and SetArmJointsRight simultaneously with a success threshold requiring 
+both actions to succeed. The robot will run the custom action GetArmJointsForPose with pose GRIPPING to compute a 
+joints_pose. The robot will then execute a Parallel that will run the custom actions SetArmJointsLeft and 
+SetArmJointsRight simultaneously with a success threshold requiring both actions to succeed. The robot will run 
+the custom action GetArmJointsForPose with pose REST to compute a joints_pose. The robot will then execute a 
+Parallel that will run the custom actions SetArmJointsLeft and SetArmJointsRight simultaneously with a success 
+threshold requiring both actions to succeed.

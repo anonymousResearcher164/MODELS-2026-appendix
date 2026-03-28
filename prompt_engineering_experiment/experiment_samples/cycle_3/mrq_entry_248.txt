@@ -1,0 +1,29 @@
+1. Execute the RecoveryNode NavigateRecovery with a maximum of six retries.
+2. Within NavigateRecovery, first execute the PipelineSequence NavigateWithReplanning.
+3. Within NavigateWithReplanning, execute the following actions in order, maintaining a control rate of 1.0 Hz as defined by RateController.
+4. Execute the RecoveryNode ComputePathToPose with one retry attempt.
+5. Within ComputePathToPose, execute the ROS action ComputePathToPose using inputs goal, path, and planner_id = GridBased.
+6. If ComputePathToPose returns SUCCESS, return SUCCESS for ComputePathToPose and proceed to the next action in the sequence.
+7. If ComputePathToPose returns FAILURE, execute the recovery action ClearEntireCostmap-Context using the service global_costmap/clear_entirely_global_costmap.
+8. After executing ClearEntireCostmap-Context, retry ComputePathToPose once.
+9. If ComputePathToPose fails again after the retry, return FAILURE for ComputePathToPose.
+10. After ComputePathToPose succeeds, execute the RecoveryNode FollowPath with one retry attempt.
+11. Within FollowPath, execute the ROS action FollowPath using input path and controller_id = FollowPath.
+12. If FollowPath returns SUCCESS, return SUCCESS for FollowPath and proceed to the next action in the sequence.
+13. If FollowPath returns FAILURE, execute the recovery action ClearEntireCostmap-Context using the service local_costmap/clear_entirely_local_costmap.
+14. After executing ClearEntireCostmap-Context, retry FollowPath once.
+15. If FollowPath fails again after the retry, return FAILURE for FollowPath.
+16. If both ComputePathToPose and FollowPath succeed, return SUCCESS for NavigateWithReplanning.
+17. If NavigateWithReplanning fails, execute the ReactiveFallback RecoveryFallback.
+18. Within RecoveryFallback, first check if GoalUpdated returns SUCCESS.
+19. If GoalUpdated returns SUCCESS, stop execution of RecoveryFallback and return SUCCESS.
+20. If GoalUpdated returns FAILURE, execute the SequenceStar RecoveryActions.
+21. Within RecoveryActions, execute the following actions in order, remembering successful completions:  
+    a. Execute ClearEntireCostmap-Subtree using the service local_costmap/clear_entirely_local_costmap.  
+    b. If successful, execute ClearEntireCostmap-Subtree using the service global_costmap/clear_entirely_global_costmap.  
+    c. If successful, execute Spin with spin_dist = 1.57.  d. If successful, execute Wait with wait_duration = 5.
+22. If any action in RecoveryActions fails, restart the sequence from the first action (ClearEntireCostmap-Subtree).
+23. If all actions in RecoveryActions succeed, return SUCCESS for RecoveryActions and RecoveryFallback.
+24. After RecoveryFallback completes, retry NavigateWithReplanning until the maximum of six retries for NavigateRecovery is reached.
+25. If NavigateWithReplanning succeeds within six retries, return SUCCESS for NavigateRecovery and complete the mission.
+26. If NavigateWithReplanning fails after six retries, return FAILURE for NavigateRecovery and terminate the mission.

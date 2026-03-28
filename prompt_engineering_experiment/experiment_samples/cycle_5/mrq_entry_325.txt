@@ -1,0 +1,26 @@
+The mission describes pasture navigation and sheltering behavior for a pasture-dwelling robot that alternates 
+between grazing outside during the day and returning to a shed at night.
+
+First, it will execute the following actions (IsOnPasture, IsDay, IsInShed, the custom action LeaveShed, the custom 
+action FindRandomPastureField, the custom action Move) in sequence. It will check that IsOnPasture is true before 
+proceeding. It will check that IsDay is true before proceeding. It will check that IsInShed is true before proceeding. 
+It will execute the custom action LeaveShed and make sure the previous checks have succeeded. It will execute the 
+custom action FindRandomPastureField after leaving the shed. It will execute the custom action Move to reach the 
+selected pasture field. It will execute the following actions in sequence. If any action succeeds, it will remember 
+it and move to the next. If any action fails, it will start the sequence again from the beginning.
+
+Next, it will execute the following actions (IsOnPasture, IsNight, inverted IsInShed, the custom action FindShed, the 
+custom action Move, the custom action EnterShed) in sequence. It will check that IsOnPasture is true before proceeding. 
+It will check that IsNight is true before proceeding. It will execute inverted IsInShed and reverse success to failure 
+or failure to success. It will execute the custom action FindShed if the inverter indicates it is not in the shed. 
+It will execute the custom action Move to travel to the shed. It will execute the custom action EnterShed to complete 
+sheltering. It will execute the following actions in sequence. If any action succeeds, it will remember it and move 
+to the next. If any action fails, it will start the sequence again from the beginning.
+
+Finally, it will execute the following actions (IsDay, inverted IsInShed, the custom action RandomMove) in sequence. 
+It will check that IsDay is true before proceeding. It will execute inverted IsInShed and reverse success to failure 
+or failure to success. It will execute the custom action RandomMove if the inverter indicates it is not in the shed. 
+It will execute the following actions in sequence. If any action succeeds, it will remember it and move to the next. 
+If any action fails, it will start the sequence again from the beginning. It will execute the following actions in 
+order. If an action succeeds, it will stop evaluating further alternatives. Else it will keep executing and 
+re-evaluating the alternatives from the beginning until one action succeeds.

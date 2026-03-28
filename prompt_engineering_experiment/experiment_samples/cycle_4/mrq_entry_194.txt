@@ -1,0 +1,7 @@
+The behavior tree describes a sequential dialogue routine where the robot will plan a message and then speak it. 
+The robot will execute ROS action SaySomething with the message “Start thinking...” as the first step in the sequence. 
+The robot will wait for ROS action SaySomething to finish before moving to the next action. The robot will execute 
+custom action ThinkWhatToSay to produce a value stored as the_answer. The robot will wait for custom action 
+ThinkWhatToSay to finish before moving to the next action. The robot will execute ROS action SaySomething using the 
+value the_answer as the spoken message. The robot will stop the sequence if any action fails. The robot will complete 
+the sequence only if all actions succeed.

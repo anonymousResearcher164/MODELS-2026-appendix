@@ -1,0 +1,8 @@
+1. Execute the following actions in sequence.
+2. First execute the ROS action Nav2ClearGlobalCostMap.
+3. If Nav2ClearGlobalCostMap returns a FAILURE status, stop the sequence and report mission failure.
+4. If Nav2ClearGlobalCostMap returns a RUNNING status, wait until the action completes before proceeding.
+5. If Nav2ClearGlobalCostMap returns a SUCCESS status, execute the custom action RobotSeekInitAction using the configuration file robot_seek_1.json.
+6. If RobotSeekInitAction returns a FAILURE status, stop the sequence and report mission failure.
+7. If RobotSeekInitAction returns a RUNNING status, wait until the action completes before proceeding.
+8. If RobotSeekInitAction returns a SUCCESS status, complete the mission successfully.

@@ -1,0 +1,13 @@
+The behavior tree describes a robot that will repeatedly detect a human’s left and right poses and announce 
+the detected pose descriptions. The robot will execute a set of actions a very large number of times due to 
+the Repeat node. The robot will run the inner Sequence in order and stop if any action fails. The robot will 
+first evaluate a Fallback that will either use detected pose text or a default announcement for the left side. 
+The robot will attempt a Sequence that runs the custom action HumanPoseDetect and waits for it to finish. The 
+robot will move to the next action in the Fallback only if the HumanPoseDetect returns failure. The robot will 
+then execute the custom action TextToSpeechActionClient with the message prefix “Left, ” and the variable 
+pose_left_speech if the detection failed. The robot will next evaluate a second Fallback that will either use 
+detected pose text or a default announcement for the right side. The robot will attempt a Sequence that runs 
+the custom action HumanPoseDetect and waits for it to finish. The robot will move to the next action in the 
+Fallback only if the HumanPoseDetect returns failure. The robot will then execute the custom action 
+TextToSpeechActionClient with the message prefix “Right, ” and the variable pose_right_speech if the detection 
+failed. The robot will continue the Repeat cycle and re-execute the entire Sequence for as many cycles as configured.

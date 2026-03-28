@@ -1,0 +1,20 @@
+The mission describes a navigation task that updates a goal, recomputes a path at a fixed rate, truncates the path 
+to a short horizon, and follows that truncated path continuously with immediate advancement during running actions.
+
+First, it will execute the following actions (RateController, KeepRunningUntilFailure) in order and stop the sequence 
+if any action fails. While an action is running or has succeeded, it will go to the next action.
+
+Next, the robot will execute the following actions (Sequence) in order and stop the sequence if any action fails. 
+It will run this sequence at a rate of 1.0 Hz.
+
+Next, it will execute the following actions (GoalUpdater, TruncatePath) in order and stop the sequence if any action 
+fails.
+
+Next, it will execute the ROS action ComputePathToPose inside the custom action GoalUpdater and make sure the updated 
+goal is used as input and the computed path is produced as output.
+
+Next, it will execute the custom action TruncatePath and make sure the path is shortened to a distance of 1.0 meter 
+to produce a truncated path.
+
+Finally, it will execute the ROS action FollowPath and, if the action succeeds, it will restart it. Else if the 
+action fails, it will stop looping and continue execution.

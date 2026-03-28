@@ -1,0 +1,52 @@
+R1 — Fullness Check Condition
+The robot shall evaluate the condition isFull to determine whether its internal storage or container is full before any further action in the sequence is executed.
+Code Reference: <Condition ID="isFull"/>
+
+R2 — Closest Resource Movement
+When isFull condition returns SUCCESS, the robot shall navigate to the nearest designated reload or resource location by executing the goClosestR action.
+If the condition returns FAILURE, the sequence shall terminate without executing subsequent actions.
+Code Reference: <Action ID="goClosestR"/>
+
+R3 — Frame Waiting Procedure
+After successfully reaching the closest resource location, the robot shall wait for a period equivalent to 15 frames (as defined in the input parameter {frames}) by executing the waitFrames action.
+During waiting, barout, baz, and fooin shall be handled according to defined mission ports or memory blackboard connections.
+Code Reference: <Action ID="waitFrames" frames="15"/>
+
+R4 — Sequential Execution Control
+The system shall execute the actions of Sequence1 in the following strict order:
+
+isFull
+goClosestR
+waitFrames If any action returns FAILURE, the sequence shall stop immediately, returning a global FAILURE status. If any action reports RUNNING, the sequence shall wait until that action completes before moving to the next. 
+Code Reference: <Sequence name="Sequence1"> [...] </Sequence> Node Behavior Template: “Execute [actions] in order. If [action] fails, stop sequence. If [action] is RUNNING, wait for [action] to finish.”
+
+✅ VALIDATION CHECKS
+
+Atomicity Check
+R1 addresses the condition check.
+R2 addresses the movement action.
+R3 addresses the waiting action.
+R4 addresses the sequence control logic. Each requirement covers only one behavioral aspect. 
+✔ Atomic
+
+Ambiguity Check
+Explicit node IDs, parameter names, durations, and conditions are specified.
+The order and results (SUCCESS, FAILURE, RUNNING) are defined unambiguously. 
+✔ Unambiguous
+
+Completeness Check
+Covers every node: the condition, two actions, and the sequence control logic according to the dictionary behavior template. 
+✔ Complete
+
+Usability Check
+The requirements can be directly implemented in a robot control system or behavioral model.
+They fully describe both control flow and action behavior without external assumptions. 
+✔ Usable
+
+Consistency Check
+Ordering, success/failure propagation, and control rules match dictionary semantics.
+No contradiction in success or stop conditions. 
+✔ Consistent
+
+✅ Summary
+Final Requirement Set (R1–R4) provides a complete, traceable, and verified representation of the Sequence1 behavior. Together they describe how the robot checks if full, moves to the nearest resource location, and waits for 15 frames — enforcing a strict sequence governed by standard BT control semantics.

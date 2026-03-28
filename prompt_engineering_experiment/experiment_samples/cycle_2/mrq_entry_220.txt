@@ -1,0 +1,62 @@
+1. Execute child nodes using a fallback control structure named Core_seq.
+2. Begin with a sequence that checks if checkMissionWait is true.
+3. If checkMissionWait is true, execute custom action stop and return SUCCESS.
+4. If checkMissionWait is false, move to the next sequence named Init.
+5. In Init, check if checkExistPathGlobal is true.
+6. If checkExistPathGlobal is true, execute custom action init.
+7. After init, enter fallback control node StateSelect to determine the operational driving state.
+
+Lane Keeping State
+1. If checkStateLaneKeeping is true, execute custom action genPathLaneKeeping to generate a lane-keeping path.
+2. Execute custom action setPath to activate the generated lane-keeping path.
+3. Evaluate condition checkFrontObject to determine if a front object exists.
+4. If checkFrontObject is true, evaluate proximity conditions in sequence: checkNearCorner, checkNearStopline, and checkProfitKeeplane.
+5. If any proximity condition is true, execute custom action acc to adjust acceleration.
+6. If checkFrontObject is true but no proximity condition succeeds, evaluate state_change fallback node.
+7. In state_change, if checkLaneChangeableLeft is true, generate a left lane-change path with genPathLaneChangeLeft.
+8. If checkCollision is true after path generation, execute setStateLaneKeeping and keepLane.
+9. If checkCollision is false, execute setStateLaneChangeLeft followed by laneChangeLeft.
+10. If checkLaneChangeableRight is true, generate a right lane-change path with genPathLaneChangeRight.
+11. If checkCollision is true after path generation, execute setStateLaneKeeping and keepLane.
+12. If checkCollision is false, execute setStateLaneChangeRight followed by laneChangeRight.
+13. If checkAbleAstar is true, evaluate checkEmptyLocal.
+14. If checkEmptyLocal is true, execute a local generation sequence: stop, setStateAstar, and genPathAstar.
+15. If all lane-keeping and lane-change operations fail, execute setStateLaneKeeping to remain in lane-keeping mode.
+
+Lane Change Left State
+1. If checkStateLaneChangeLeft is true, execute setPath to load the left lane-change path.
+2. If checkCollision is true or checkEndLaneChange is true, execute setStateLaneKeeping to return to lane-keeping mode.
+3. If no collision or end condition is met, execute setStateLaneChangeLeft to maintain left lane-change state.
+
+Lane Change Right State
+1. If checkStateLaneChangeRight is true, execute setPath to load the right lane-change path.
+2. If checkCollision is true or checkEndLaneChange is true, execute setStateLaneKeeping to return to lane-keeping mode.
+3. If no collision or end condition is met, execute setStateLaneChangeRight to maintain right lane-change state.
+
+A* State
+1. If checkStateAstar is true, execute setPath to load the A* path.
+2. If checkCollision is true, execute stop and genPathAstar to regenerate a safe path.
+3. If checkFinishAstar is true, execute setFinishLocal and setStateLaneKeeping to finalize A* navigation.
+4. If neither collision nor finish condition is met, execute localPathfollow to continue following the local path.
+
+Fallback and Recovery
+1. If all operational states fail, execute recovery fallback that always fails, ensuring transition to higher-level fallback handling.
+2. After StateSelect, execute publishData to broadcast current state and path data.
+
+Global Fallback Path Handling
+1. If Core_seq fallback proceeds past Init, execute a sequence that always fails, forcing evaluation of the next fallback path sequence.
+2. Check checkExistPathGlobal and, if true, execute init.
+3. Evaluate checkGlobalLaneChange; if false, execute genGlobalFollowPath to generate a global follow path.
+4. Execute setPath to load the global follow path.
+5. If checkFrontObject is true, evaluate checkIsGlobalFollow.
+6. If checkIsGlobalFollow is true, assess proximity conditions (checkNearCorner, checkNearStopline, checkProfitKeeplane) and execute acc if any is true.
+7. If checkLaneChange is true, evaluate checkLaneChangeableLeft or checkLaneChangeableRight.
+8. If checkLaneChangeableLeft is true, and checkGenPathLaneChange is true, execute genPathLaneChangeLeft.
+9. If checkCollision is true after left path generation, execute keepLane. Otherwise, execute laneChangeLeft.
+10. If checkLaneChangeableRight is true, and checkGenPathLaneChange is true, execute genPathLaneChangeRight.
+11. If checkCollision is true after right path generation, execute keepLane. Otherwise, execute laneChangeRight.
+12. If checkTrafficLight is true, evaluate checkPassAbleTrafficLight.
+13. If checkPassAbleTrafficLight is true, and checkCollision is true, execute stop; otherwise, execute drive.
+14. If checkPassAbleTrafficLight is false, execute stopTrafficLight.
+15. If no traffic light condition applies, execute drive.
+16. Execute setPath to finalize and maintain current driving path.

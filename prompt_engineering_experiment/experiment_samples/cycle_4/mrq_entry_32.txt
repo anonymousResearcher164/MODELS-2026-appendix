@@ -1,0 +1,4 @@
+The behavior tree describes a single-step mission where the robot executes a search operation within a 
+sequential control flow. The robot will execute ROS action Search as the only action in the root sequence. 
+The robot will run ROS action Search and wait for it to finish before proceeding. The robot will stop the 
+sequence if ROS action Search fails. The robot will complete the sequence if ROS action Search succeeds.

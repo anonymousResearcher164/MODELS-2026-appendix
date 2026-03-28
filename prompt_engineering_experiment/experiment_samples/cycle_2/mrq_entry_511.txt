@@ -1,0 +1,24 @@
+1. Attempt to execute the NavigateWithReplanning sequence. If any child node fails, attempt up to two retries before mission failure.
+2. Execute the NavigateWithReplanning sequence in the following order: RateController, then FollowPath, ensuring each completes before proceeding to the next.
+3. Within RateController, execute the child node at a rate of 1 Hz.
+4. Within RateController, attempt to execute the ComputePathToPose RecoveryNode. If it fails, retry up to four times before returning FAILURE to RateController.
+5. Execute ComputePathToPose using the goal, path, and planner_id parameters.
+6. If ComputePathToPose fails, execute PathToPoseFallback as a ReactiveFallback node.
+7. In PathToPoseFallback, first check if the GoalUpdated condition is true; if so, return SUCCESS and stop further execution.
+8. If GoalUpdated is false, execute GlobalPlannerRecoveryActions using a RoundRobin approach.
+9. In GlobalPlannerRecoveryActions, alternately attempt to ClearEntireCostmap on the global costmap and Wait for 2 seconds, repeating as necessary.
+10. If any action in GlobalPlannerRecoveryActions returns SUCCESS, return SUCCESS for the recovery action and stop further attempts.
+11. If all actions in GlobalPlannerRecoveryActions fail, return FAILURE for the recovery action.
+12. After RateController finishes, attempt to execute the FollowPath RecoveryNode. If it fails, retry up to four times before returning FAILURE to NavigateWithReplanning.
+13. Execute FollowPath using the path and controller_id parameters.
+14. If FollowPath fails, execute FollowPathFallback as a ReactiveFallback node.
+15. In FollowPathFallback, first check if the GoalUpdated condition is true; if so, return SUCCESS and stop further execution.
+16. If GoalUpdated is false, execute PlannerRecoveryActions using a RoundRobin approach.
+17. In PlannerRecoveryActions, alternately attempt to ClearEntireCostmap on the local costmap and Spin for a distance of 1.57 radians, repeating as necessary.
+18. If any action in PlannerRecoveryActions returns SUCCESS, return SUCCESS for the recovery action and stop further attempts.
+19. If all actions in PlannerRecoveryActions fail, return FAILURE for the recovery action.
+20. If NavigateWithReplanning fails, execute RecoveryFallback as a ReactiveFallback node.
+21. In RecoveryFallback, first check if the GoalUpdated condition is true; if so, return SUCCESS and stop further execution.
+22. If GoalUpdated is false, execute Wait for 5 seconds.
+23. If Wait for 5 seconds returns SUCCESS, return SUCCESS for RecoveryFallback.
+24. If all retries in NavigateRecovery are exhausted and all fallback actions fail, the mission is considered failed.

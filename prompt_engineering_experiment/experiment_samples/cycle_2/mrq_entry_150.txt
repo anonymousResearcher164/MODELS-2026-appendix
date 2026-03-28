@@ -1,0 +1,17 @@
+1. Execute child nodes in order using a fallback control structure.
+2. Begin with the main sequence sequence-with-memory node.
+3. Execute custom action GetTarget to acquire a valid target.
+4. If GetTarget returns SUCCESS, remember success and proceed to the next action.
+5. If GetTarget returns FAILURE, restart the sequence-with-memory node from the beginning.
+6. Execute custom action Move to approach the identified target.
+7. If Move returns SUCCESS, remember success and proceed to the next sequence.
+8. If Move returns FAILURE, restart the sequence-with-memory node from the beginning.
+9. In the nested sequence, evaluate condition TargetAdjacent to determine if the target is adjacent.
+10. If condition TargetAdjacent is true, execute custom action AttackTarget.
+11. If condition TargetAdjacent is false, stop the nested sequence and return FAILURE to the parent sequence-with-memory node.
+12. If AttackTarget returns SUCCESS, remember success and complete the main sequence-with-memory node.
+13. If AttackTarget returns FAILURE, restart the sequence-with-memory node from the beginning.
+14. If the main sequence-with-memory node fails to complete successfully, execute fallback node’s next child: custom action RandomMove.
+15. Execute custom action RandomMove to perform a random movement pattern when target acquisition or engagement fails.
+16. If RandomMove returns SUCCESS, the fallback node returns SUCCESS and the mission completes.
+17. If RandomMove returns FAILURE, the fallback node returns FAILURE and the mission ends unsuccessfully.

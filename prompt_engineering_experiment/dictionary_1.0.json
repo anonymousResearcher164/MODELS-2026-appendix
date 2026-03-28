@@ -1,0 +1,102 @@
+[
+  {
+    "Node Type": "Sequence",
+    "Natural Language Description": "Execute a series of child nodes in order from left to right.",
+    "Behavior Template": "Execute [actions] in order. If [action] fails, stop sequence. If [action] is RUNNING, wait for [action] to finish. Else move to the next [action]."
+  },
+  {
+    "Node Type": "SequenceWithMemory, SequenceStar",
+    "Natural Language Description": "Execute a series of child nodes in order, from left to right, remembering which ones have already succeeded.",
+    "Behavior Template": "Execute [actions] in sequence. If [action] returns success, move to the next. If [action] returns RUNNING, store child index in memory and resume from index. Else if [action] fails, reset memory."
+  },
+  {
+    "Node Type": "Switch",
+    "Natural Language Description": "Execute child node based on blackboard value.",
+    "Behavior Template": "Read blackboard value. Compare it against a set of cases and execute matching [action]. If no case matches the value, execute default [action]."
+  },
+  {
+    "Node Type": "WhileDoElse",
+    "Natural Language Description": "Execute a node while a condition is true else execute and alternative node if that same condition fails.",
+    "Behavior Template": "While a given condition is true, execute do branch [action]. If the condition fails, execute else branch [action]."
+  },
+  {
+    "Node Type": "Loop",
+    "Natural Language Description": "Repeatedly execute a child node for a specified number of iterations, until a specific status is returned or forever.",
+    "Behavior Template": "Execute [action] continuously until a FAILURE or SUCCESS is returned. Else return RUNNING and keep executing [action] forever."
+  },
+  {
+    "Node Type": "Parallel",
+    "Natural Language Description": "Execute multiple child nodes simultaneously, ensuring all are completed successfully.",
+    "Behavior Template": "Execute a series of [actions] simultaneously. If success threshold is reached, return SUCCESS. Else if failure threshold is reached, return FAILURE. Else return RUNNING."
+  },
+  {
+    "Node Type": "Fallback",
+    "Natural Language Description": "Execute child nodes sequentially from left to right, until one succeeds or all fail.",
+    "Behavior Template": "Execute [actions] in order. If [action] fails, move to the next [action] until any [action] succeeds. Then return SUCCESS. If no [action] succeeds, return FAILURE."
+  },
+  {
+    "Node Type": "ForceSuccess",
+    "Natural Language Description": "Force child node to succeed regardless of the conditions.",
+    "Behavior Template": "Execute [action] but make sure it always returns SUCCESS, unless the [action] is still RUNNING."
+  },
+  {
+    "Node Type": "ForceFailure",
+    "Natural Language Description": "Force child node to fail regardless of the conditions.",
+    "Behavior Template": "Execute [action] but make sure it always returns FAILURE when it is complete."
+  },
+  {
+    "Node Type": "RepeatUntilSuccess",
+    "Natural Language Description": "Repeatedly execute child node until success is achieved.",
+    "Behavior Template": "Keep retrying the [action] until it succeeds. Then stop [action] execution and return SUCCESS."
+  },
+  {
+    "Node Type": "Retry",
+    "Natural Language Description": "Retry the execution of a child node for either a fixed number of times or until the node is executed successfully.",
+    "Behavior Template": "Repeatedly execute [action] whenever it fails. Repeat for a specified retry count or until SUCCESS is returned."
+  },
+  {
+    "Node Type": "ReactiveSequence",
+    "Natural Language Description": "Execute a series of child nodes in order from left to right. While a later node is running, re-evaluate previous child nodes.",
+    "Behavior Template": "Execute [actions] in order. If [action] returns SUCCESS, move to the next. If [action] fails, stop and return FAILURE. If [action] is RUNNING, return RUNNING but re-evaluate previous [actions] in order."
+  },
+  {
+    "Node Type": "ReactiveFallback",
+    "Natural Language Description": "Execute a series of child nodes in order from left to right. While a later node is running, restart evaluation from node 0.",
+    "Behavior Template": "Execute a series of [actions] in order. If [action] returns SUCCESS, stop execution. Else keep running and re-evaluate previous [actions] in order, whenever an [action] is in execution."
+  },
+  {
+    "Node Type": "Repeat",
+    "Natural Language Description": "Execute a set of child nodes multiple times.",
+    "Behavior Template": "Execute [action] a set number of times or infinitely."
+  },
+  {
+    "Node Type": "BlackboardCheckValue",
+    "Natural Language Description": "Check if a value in memory can be either true or false matches the expected value.",
+    "Behavior Template": "Look up a value in the blackboard. If the value matches target, return SUCCESS. Else return FAILURE. Also, if the blackboard does not have required key return FAILURE."
+  },
+  {
+    "Node Type": "Delay",
+    "Natural Language Description": "Wait for a given duration before running or returning a result from the associated child node.",
+    "Behavior Template": "Execute [action]. If the [action] returns SUCCESS, start delay timer. While delay is active, return RUNNING. After delay, return SUCCESS."
+  },
+  {
+    "Node Type": "Inverter",
+    "Natural Language Description": "Negate a condition.",
+    "Behavior Template": "Execute an [action]. If [action] returns SUCCESS or FAILURE return the reverse. Else return RUNNING."
+  },
+  {
+    "Node Type": "KeepRunningUntilFailure",
+    "Natural Language Description": "Keep re-running child node as long as it does not fail.",
+    "Behavior Template": "Execute [action]. If [action] returns SUCCESS, retart it and keep running. Else if [action] returns FAILURE, stop looping and return SUCCESS. Else return RUNNING."
+  },
+  {
+    "Node Type": "RetryUntilSuccessful",
+    "Natural Language Description": "Continuously retry a child node until it succeeds.",
+    "Behavior Template": "Keep executing [action] until it returns SUCCESS. If retry returns FAILURE, restart [action]. Else return RUNNING."
+  },
+  {
+    "Node Type": "Timeout",
+    "Natural Language Description": "Execute child node, but only for a maximum duration.",
+    "Behavior Template": "If the execution of an [action] does not end within a specified duration, interrupt it and return a specific result."
+  }
+]

@@ -1,0 +1,4 @@
+The mission describes a single-arm manipulation task executed through a sequential control flow. 
+First, the robot will execute the ROS action ExecuteGroupPose for the arm group with a relative 
+goal pose of 0 0 0 0 0 0 1 and a tolerance of 0.01. Next, it will perform this action as part of 
+a Sequence and will stop the sequence if the action fails.

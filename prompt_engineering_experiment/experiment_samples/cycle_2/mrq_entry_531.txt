@@ -1,0 +1,17 @@
+1. Attempt to execute the navigation recovery sequence up to 6 times if failures occur.
+2. Upon each navigation recovery attempt, reset the sequence when a new goal is updated.
+3. When a new goal is received, initiate the progress checker pipeline for navigation with replanning.
+4. Regulate the rate of path computation within the progress checker pipeline to 0.02 Hz.
+5. Attempt to compute a path to the specified goal using the grid-based planner, with up to 1 retry in case of failure.
+6. If path computation fails, execute a reactive fallback: first check for a new goal update; if not updated, attempt to clear the entire global costmap and then retry path computation.
+7. After path computation, monitor the robot's progress, checking every 2.0 meters to determine if a path smoothing step is needed.
+8. Attempt to smooth the computed path using the specified smoother, with up to 1 retry in case of failure.
+9. If path smoothing fails, execute a reactive fallback: first check for a new goal update; if not updated, clear the entire global costmap, then recompute the path to the goal.
+10. After smoothing the path, attempt to follow the smoothed path using the specified path-following controller, with up to 1 retry in case of failure.
+11. If following the path fails, execute a reactive fallback: first check for a new goal update; if not updated, clear the entire local costmap.
+12. Continuously check for feedback that the path is being followed after the path-following step.
+13. If the navigation recovery sequence fails after the allowed retries, execute a higher-level reactive fallback for recovery.
+14. In the event of a higher-level failure, first check for a new goal update; if not updated, proceed with recovery actions in round-robin order.
+15. Sequentially perform clearing actions: clear the entire local costmap, then clear the entire global costmap.
+16. After clearing actions, if recovery is still required, wait for 5 seconds.
+17. If recovery remains unsuccessful, back up the robot by 0.15 meters at a speed of 0.025 meters per second.

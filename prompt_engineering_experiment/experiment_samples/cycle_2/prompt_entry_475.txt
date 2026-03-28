@@ -1,0 +1,279 @@
+[System message]
+You are an expert systems engineer specialized in converting behavioral models into mission requirements. 
+I will provide you with a behavior tree that describes real-world system behavior. Format the outputted system-level 
+mission requirements as a numbered list. Do keep your answer as simple text with a mix of imperative and descriptive language. 
+Use the dictionary provided, as a reference to interpret behavior control of the corresponding node types. Use the example provided as a
+reference to the output format desired.
+
+[Prompt messages]
+Your task is to generate system-level mission requirements that strictly satisfy the following constraints:
+atomic - each requirement statement must focus on a single aspect of behavior,
+unambiguious - each requirement statement can only be interpreted in one way,
+complete - each requirement statement must be able to stand alone without missing conditions or assumptions,
+usable - all requirements statements can be collectively used by specified users to achieve specified goals with effectiveness, efficiency and satisfaction in a specified context,
+consistent - requirements statements do not contradict each other.
+At the end of your response, briefly verify each constraint by explicitly stating Pass/Fail with a brief justification.
+
+[Chat prompt]
+Dictionary:
+<<<BEGIN_DICTIONARY>>>
+{
+  "title": "Dictionary for Interpreting Behavior Control and Modification",
+  "nodes": [
+    {
+      "nodeType": "Sequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] fails, stop sequence. If [Action] is RUNNING, wait for [Action] to finish. Else move to the next [Action]."
+    },
+    {
+      "nodeType": "SequenceWithMemory, SequenceStar",
+      "naturalLanguageDescription": "Execute a series of child nodes in order, from left to right, remembering which ones have already succeeded.",
+      "behaviorTemplate": "Execute [Actions] in sequence. If [action] returns SUCCESS, remember it and move to the next. If [Action] returns FAILURE, start the sequence again from the beginning."
+    },
+    {
+      "nodeType": "Switch",
+      "naturalLanguageDescription": "Execute child node based on blackboard value.",
+      "behaviorTemplate": "Read blackboard value. Compare value against a set of cases. If case value matches switch value execute corresponding [Action]. Else if no case matches, execute default [Action]."
+    },
+    {
+      "nodeType": "WhileDoElse",
+      "naturalLanguageDescription": "Execute a node while a condition is true else execute and alternative node if that same condition fails.",
+      "behaviorTemplate": "While [Condition], do [Action]. If [!Condition], execute alternative [Action]."
+    },
+    {
+      "nodeType": "Loop",
+      "naturalLanguageDescription": "Repeatedly execute a child node for a specified number of iterations, until a specific status is returned or forever.",
+      "behaviorTemplate": "Execute [Action] continuously until a FAILURE or SUCCESS is returned. Else return RUNNING and keep executing [Action] forever."
+    },
+    {
+      "nodeType": "Parallel",
+      "naturalLanguageDescription": "Execute multiple child nodes simultaneously, ensuring all are completed successfully.",
+      "behaviorTemplate": "Execute a series of [Actions] simultaneously. If success threshold is reached, return SUCCESS. Else if failure threshold is reached, return FAILURE. Else return RUNNING."
+    },
+    {
+      "nodeType": "Fallback",
+      "naturalLanguageDescription": "Execute child nodes sequentially from left to right, until one succeeds or all fail.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] fails, move to the next [Action] until any [Action] succeeds. Then return SUCCESS. If no [Action] succeeds, return FAILURE."
+    },
+    {
+      "nodeType": "ForceSuccess",
+      "naturalLanguageDescription": "Force child node to succeed regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always returns SUCCESS, unless the [Action] is still RUNNING."
+    },
+    {
+      "nodeType": "ForceFailure",
+      "naturalLanguageDescription": "Force child node to fail regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always returns FAILURE when it is complete."
+    },
+    {
+      "nodeType": "RepeatUntilSuccess",
+      "naturalLanguageDescription": "Repeatedly execute child node until success is achieved.",
+      "behaviorTemplate": "Continuously execute [Action] until it succeeds. Then stop [Action] execution and return SUCCESS."
+    },
+    {
+      "nodeType": "Retry",
+      "naturalLanguageDescription": "Retry the execution of a child node for either a fixed number of times or until the node is executed successfully.",
+      "behaviorTemplate": "Continuously execute [Action] whenever it fails. Repeat for a specified retry count or until SUCCESS is returned."
+    },
+    {
+      "nodeType": "ReactiveSequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, re-evaluate previous child nodes.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] returns SUCCESS, move to the next. If [Action] fails, stop and return FAILURE. If [Action] is RUNNING, return RUNNING but re-evaluate previous [Actions] in order."
+    },
+    {
+      "nodeType": "ReactiveFallback",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, restart evaluation from node 0.",
+      "behaviorTemplate": "Execute a series of [Actions] in order. If [Action] returns SUCCESS, stop execution. Else keep running and re-evaluate previous [Actions] in order, whenever an [Action] is in execution."
+    },
+    {
+      "nodeType": "Repeat",
+      "naturalLanguageDescription": "Execute a set of child nodes multiple times.",
+      "behaviorTemplate": "Execute [Action] a set number of times or infinitely."
+    },
+    {
+      "nodeType": "BlackboardCheckValue",
+      "naturalLanguageDescription": "Check if a value in memory can be either true or false matches the expected value.",
+      "behaviorTemplate": "Look up a value in the blackboard. If the value matches target, return SUCCESS. Else return FAILURE. Also, if the blackboard does not have required key return FAILURE."
+    },
+    {
+      "nodeType": "Delay",
+      "naturalLanguageDescription": "Wait for a given duration before running or returning a result from the associated child node.",
+      "behaviorTemplate": "Execute [Action]. If the [Action] returns SUCCESS, start delay timer. While delay is active, return RUNNING. After delay, return SUCCESS."
+    },
+    {
+      "nodeType": "Inverter",
+      "naturalLanguageDescription": "Negate a condition.",
+      "behaviorTemplate": "Execute an [Action]. If [Action] returns SUCCESS or FAILURE return the reverse. Else return RUNNING."
+    },
+    {
+      "nodeType": "KeepRunningUntilFailure",
+      "naturalLanguageDescription": "Keep re-running child node as long as it does not fail.",
+      "behaviorTemplate": "Execute [Action]. If [Action] returns SUCCESS, retart it and keep running. Else if [Action] returns FAILURE, stop looping and return SUCCESS. Else return RUNNING."
+    },
+    {
+      "nodeType": "RetryUntilSuccessful",
+      "naturalLanguageDescription": "Continuously retry a child node until it succeeds.",
+      "behaviorTemplate": "Keep executing [Action] until it returns SUCCESS. If retry returns FAILURE, restart [Action]. Else return RUNNING."
+    },
+    {
+      "nodeType": "Timeout",
+      "naturalLanguageDescription": "Execute child node, but only for a maximum duration.",
+      "behaviorTemplate": "If the execution of [Action] does not end within a specified duration, interrupt it and return a specific result."
+    },
+    {
+      "nodeType": "[Action]",
+      "naturalLanguageDescription": "A child node name",
+      "behaviorTemplate": "If action name is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Actions]",
+      "naturalLanguageDescription": "A series of child node names",
+      "behaviorTemplate": "For each action name, if it is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Condition]",
+      "naturalLanguageDescription": "A check that returns success",
+      "behaviorTemplate": "[condition ID] is true"
+    },
+    {
+      "nodeType": "[!Condition]",
+      "naturalLanguageDescription": "A check that returns failure",
+      "behaviorTemplate": "[condition ID] is false"
+    }
+  ]
+}
+<<<END_DICTIONARY>>>
+Example:
+<<<BEGIN_EXAMPLE>>>
+<?xml version="1.0"?>
+<root main_tree_to_execute="SayStuff">
+    <TreeNodesModel>
+        <Action ID="SaySomething"/>
+        <Action ID="SayHello"/>
+        <Control ID="SequenceStar"/>
+    </TreeNodesModel>
+    <BehaviorTree ID="SayStuff">
+        <SequenceStar>
+            <Action ID="SaySomething"/>
+            <Action ID="SayHello"/>
+        </SequenceStar>
+    </BehaviorTree>
+</root>
+
+1. Execute actions in sequence (SaySomething, then SayHello).
+2. If custom action SaySomething returns SUCCESS, remember it and move to custom action SayHello.
+3. If custom action SaySomething returns FAILURE, restart the sequence from the beginning.
+4. If custom action SayHello returns SUCCESS after custom action SaySomething succeeds, remember it and complete the mission.
+5. If custom action SayHello returns FAILURE, restart the entire sequence from custom action SaySomething again.
+<<<END_EXAMPLE>>>
+Behavior Tree:
+<<<BEGIN_BEHAVIOR_TREE>>>
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <SubTree ID="ChargeST"/>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <BehaviorTree ID="ChargeST">
+        <SequenceStar>
+            <Action ID="Speak" action_name="/gcloud_tts" language="pt_PT" utterance="Tenho fome" voice="pt-PT-Wavenet-D"/>
+            <Action ID="WaitForXSeconds" name="Wait2Seconds" result="SUCCESS" seconds="2"/>
+            <Fallback>
+                <SequenceStar>
+                    <RetryUntilSuccesful num_attempts="3">
+                        <Action ID="MoveBase" action_name="move_base" frame_id="map" goal_pose="-1.7971;-5.5118;0.0;0;0;0.72703;0.68659" name="Go to first point"/>
+                    </RetryUntilSuccesful>
+                    <Parallel failure_threshold="1" success_threshold="2">
+                        <Action ID="Charge" action="CHARGE" action_name="charging_action"/>
+                        <Repeat num_cycles="5">
+                            <Action ID="Speak" action_name="/gcloud_tts" language="pt_PT" utterance="bip bip" voice="pt-PT-Wavenet-D"/>
+                        </Repeat>
+                    </Parallel>
+                </SequenceStar>
+            </Fallback>
+            <Action ID="WaitForXSeconds" result="SUCCESS" seconds="10"/>
+            <Action ID="Speak" action_name="/gcloud_tts" language="pt_PT" utterance="Estou cheio, vou sair da estação" voice="pt-PT-Wavenet-D"/>
+            <Action ID="Charge" action="STOP_CHARGE" action_name="charging_action"/>
+        </SequenceStar>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="ArmCartesian">
+            <input_port name="action_name"/>
+            <input_port name="frame_id"/>
+            <input_port name="pose"/>
+            <input_port name="type"/>
+        </Action>
+        <Action ID="ArmRoutines">
+            <input_port name="gesture"/>
+            <input_port name="topic"/>
+        </Action>
+        <Action ID="Charge">
+            <input_port name="action" type="std::string"/>
+            <input_port name="action_name" type="std::string"/>
+        </Action>
+        <SubTree ID="ChargeST"/>
+        <Action ID="CheckBattery">
+            <output_port name="battery_state" type="int"/>
+            <output_port name="percentage" type="double"/>
+            <input_port name="service_name" type="std::string"/>
+        </Action>
+        <Condition ID="CheckBool">
+            <input_port name="variable"/>
+        </Condition>
+        <Action ID="CheckCharging">
+            <output_port name="charging_state" type="int"/>
+            <input_port name="service_name" type="std::string"/>
+        </Action>
+        <Condition ID="CompareDouble">
+            <input_port name="A"/>
+            <input_port name="B"/>
+            <input_port name="Condition"/>
+        </Condition>
+        <Condition ID="CompareInt">
+            <input_port name="A" type="int"/>
+            <input_port name="B" type="int"/>
+            <input_port name="Condition" type="std::string"/>
+        </Condition>
+        <Action ID="DetectBlocks">
+            <output_port name="block_list" type="social_cues::BlockList_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="block_topic" type="std::string"/>
+        </Action>
+        <Action ID="DetectFaces">
+            <output_port name="faceListOut"/>
+            <input_port name="face_topic"/>
+        </Action>
+        <Action ID="FaceCounter">
+            <input_port name="faceListIn"/>
+            <input_port name="number_faces"/>
+        </Action>
+        <Action ID="GazeAtTarget">
+            <input_port name="action_name"/>
+            <input_port name="fixation_pose"/>
+            <input_port name="frame_id"/>
+        </Action>
+        <Action ID="MoveBase">
+            <input_port name="action_name" type="std::string"/>
+            <input_port name="frame_id" type="std::string"/>
+            <input_port name="goal_pose" type="geometry_msgs::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+        </Action>
+        <Action ID="SelectBlock">
+            <input_port name="block_list" type="social_cues::BlockList_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <output_port name="block_pose" type="geometry_msgs::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;"/>
+            <input_port name="position_in_list" type="std::string"/>
+        </Action>
+        <Action ID="Speak">
+            <input_port name="action_name" type="std::string"/>
+            <input_port name="language" type="std::string"/>
+            <input_port name="utterance" type="std::string"/>
+            <input_port name="voice" type="std::string"/>
+        </Action>
+        <Action ID="WaitForXSeconds">
+            <input_port name="result" type="std::string"/>
+            <input_port name="seconds" type="std::string"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+<<<END_BEHAVIOR_TREE>>>

@@ -1,0 +1,165 @@
+1. Root Controller
+Code Reference
+
+<Sequence>
+   <SubTree ID="FullCompetitionMode"/>
+</Sequence>
+Dictionary: Sequence →
+Execute [actions] in order. If [action] fails, stop sequence.
+
+R1 – Competition Startup
+The robot shall start the competition behavior by executing the FullCompetitionMode subtree.
+If initialization fails, the system shall halt mission execution.
+If the subtree is running, the sequence shall wait until completion.
+
+2. FullCompetitionMode
+Code Reference
+
+<Repeat num_cycles="-1">
+   <Sequence>
+      <SubTree ID="GetInRestPose"/>
+      <SubTree ID="DoYourTrick"/>
+   </Sequence>
+</Repeat>
+Dictionary: Repeat → execute child indefinitely (‑1)
+Dictionary: Sequence → ordered execution, stop on failure.
+
+R2 – Indefinite Operation Loop
+The robot shall indefinitely repeat the competition cycle until externally stopped.
+
+R3 – Rest‑then‑Perform Cycle
+In each cycle, the robot shall first execute GetInRestPose, then execute DoYourTrick in sequence order.
+If either subtree fails, that cycle iteration shall restart according to Repeat semantics.
+
+3. GetInRestPose Module
+Code Reference
+
+<Sequence>
+   <GetArmJointsForPose pose="REST" joints_pose="{joints_pose}"/>
+   <Parallel success_threshold="3" failure_threshold="3">
+      <Sequence>
+         <HeadControl pitch="0" yaw="90"/>
+         <TorsoControl relative_height="0.05"/>
+      </Sequence>
+      <SetArmJointsLeft joints_pose="{joints_pose}"/>
+      <SetArmJointsRight joints_pose="{joints_pose}"/>
+   </Parallel>
+</Sequence>
+R4 – Retrieve Rest Arm Configuration
+The robot shall compute the joint configuration corresponding to the REST pose and store it in {joints_pose}.
+
+R5 – Enter Rest Pose in Parallel
+The robot shall simultaneously position its head, torso, and both arms for the REST posture using parallel execution:
+
+Head sets to pitch = 0°, yaw = 90°.
+Torso sets relative height = 0.05.
+Both arms move to {joints_pose}. The Parallel node shall complete only when all three actions report success.
+4. GetInUpTrayPose (analogous)
+R6 – Retrieve and Set UPTRAY Pose
+The robot shall retrieve arm joints for pose UPTRAY, store in {joints_pose}, then move both arms into that pose in parallel until both are successful.
+
+5. Octomap Management
+ClearAllOctomaps
+<ForceSuccess>
+  <Sequence>
+    <ClearOctomap side="left"/>
+    <ClearOctomap side="right"/>
+  </Sequence>
+</ForceSuccess>
+R7 – Clear Octomaps
+The robot shall attempt to clear the left and right octomaps sequentially.
+Regardless of internal outcome, the node shall return overall SUCCESS when completed.
+
+UpdateOctomap / UpdateOctomapLowerHalf
+R8 – Update Environmental Map – Upper View
+The robot shall clear octomaps then capture two head views at pitch = 60° for yaw = 90° and 135°. The subtree shall report SUCCESS even if any step internally fails.
+
+R9 – Update Environmental Map – Lower View
+The robot shall similarly clear both octomaps then capture four head views (pitch ±60°, yaw = 90° and 135°) and shall always return SUCCESS.
+
+6. DoYourTrick Loop
+<Repeat num_cycles="-1">
+   <Sequence>
+      <ForceSuccess><SubTree ID="FillYourTray"/></ForceSuccess>
+      <ForceSuccess><SubTree ID="FillTheShelf"/></ForceSuccess>
+   </Sequence>
+</Repeat>
+R10 – Continuous Demonstration Loop
+The robot shall indefinitely repeat its trick procedure consisting of filling its tray and filling the shelf.
+
+R11 – Guaranteed Continuity
+Each sub‑activity (FillYourTray, FillTheShelf) shall be wrapped with ForceSuccess, ensuring the loop continues even on subtask failure.
+
+7. Scan Operations
+ScanTable
+(retry until success)
+R12 – Table Scanning
+The robot shall repeatedly attempt the full table scanning sequence until success:
+
+Adjust torso to 0.95 height.
+Move head to scan angles 0°, 140°.
+Pause 3 s, start scanning, pause 3 s again.
+Clear octomaps.
+Collect detected tomatoes and record them as occupied loci in tray table.
+Update the planning scene.
+ScanShelves
+(sequence logic)
+R13 – Shelf Scanning
+The robot shall lower torso, orient head to 90°, scan shelves, record detected loci in tray shelf as unoccupied, then update the planning scene.
+
+8. FillYourTray
+Contains nested repeats, conditions and blackboard operations.
+R14 – Table Loading Workflow
+The robot shall travel to the table, scan items, set blackboard values for tray = table and side = RIGHT, and repeatedly transfer items from the table tray to the backtray until stopped.
+
+9. FillTheShelf
+R15 – Shelf Filling Workflow
+The robot shall:
+
+Go to rest.
+Navigate to shelves.
+Scan shelves and update octomap.
+Raise torso, orient head (60°, 110°).
+Repeatedly move items from the backtray to the shelf, guaranteed to continue even on individual transfer failures.
+10. Arm Fill Subtrees
+LeftArmFillYourTray / RightArmFillYourTray
+R16 – Pick‑and‑Place Cycle (Per Arm)
+Each arm shall:
+
+Pick an occupied locus from the source tray.
+Find an empty target locus in destination tray.
+Plan and execute pick‑and‑place operation to target pose.
+Update source locus to unoccupied and destination to occupied. If any pick or place attempt fails, handle recovery by releasing the reserved locus and returning FAILURE or SUCCESS as defined by parents (Fallback or ForceSuccess nodes).
+11. Tray Status Utilities
+TrayIsFull
+R17 – Tray Fullness Evaluation
+The robot shall check for existence of any empty locus on either left or right side; if none exist, the inverter behavior makes node return SUCCESS (tray is full).
+
+TrayIsEmpty
+R18 – Tray Emptiness Evaluation
+The robot shall check for existence of occupied loci; if none are found, fallback returns FAILURE, implying tray empty status as appropriate.
+
+12. Navigation Subtrees
+GoToTable / GoToShelves
+R19 – Table Navigation
+The robot shall sequentially move to map locations (1.5 ; ‑0.1 ; 0.0) then (2.2 ; ‑0.1 ; 0.0).
+
+R20 – Shelf Navigation
+The robot shall sequentially move to map goals (1.0 ; ‑0.3 ; 0.0) and (2.0 ; ‑0.3 ; 0.4).
+
+13. MoveTomatoCans
+R21 – Controlled Transfer Batch
+The robot shall execute up to four repetition cycles transferring tomato cans with both arms:
+
+Runs fallback combinations of left and right arm pick‑and‑place subtrees inside a KeepRunningUntilFailure loop.
+Operations forced to succeed for continuous repetition.
+✅ Requirement Set Checks
+Criterion	Assessment	Evidence
+Atomicity	✔ Each R‑item covers a single behavioral purpose (movement, update, check, loop, etc.).	Example: R9 isolates octomap lower‑half update only.
+Ambiguity	✔ Parameter values and success conditions explicitly stated; BT control logic interpreted per dictionary.	Nodes reference exact poses, thresholds, outcomes.
+Completeness	✔ All major subtrees from the XML are represented (navigation, scanning, octomap, tray management, arm control).	Subtrees FullCompetitionMode, GetInRestPose, Fill* captured.
+Usability	✔ The requirements define continuous mission behavior suitable for robotic competition task implementation.	Used by mission planners and control engineers.
+Consistency	✔ No contradictory success or loop semantics; ForceSuccess/Fallback/Sequence interpretations align with dictionary.	ForceSuccess wraps subtasks uniformly.
+✅ Summary:
+Requirements R1–R21 provide a complete, interpretable mission specification:
+the robot indefinitely cycles between resting, scanning, loading trays from a

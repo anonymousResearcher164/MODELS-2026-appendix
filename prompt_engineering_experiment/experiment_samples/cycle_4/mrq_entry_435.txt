@@ -1,0 +1,17 @@
+The behavior tree describes pasture navigation and sheltering behavior for an animal across day and night cycles. 
+The animal will execute a series of actions in order, and it will select the first branch that succeeds after 
+checking branches from left to right and retrying from the beginning when re-evaluated. The animal will first 
+try a sequence that remembers progress and will require being on pasture, being in daytime, and being inside 
+the shed before proceeding. The animal will leave the shed using custom action LeaveShed if the preceding 
+conditions are true. The animal will select a random pasture field using custom action FindRandomPastureField 
+after leaving the shed. The animal will move to the selected field using custom action Move to complete this branch. 
+The animal will otherwise try a second memory-based sequence that will require being on pasture, being in nighttime, 
+and not being inside the shed before proceeding. The animal will confirm that not being inside the shed is true by 
+inverting the result of condition IsInShed. The animal will find the shed using custom action FindShed when those 
+conditions hold. The animal will move toward the shed using custom action Move after locating it. The animal will 
+enter the shed using custom action EnterShed to complete this branch. The animal will otherwise try a third 
+memory-based sequence that will require being in daytime and not being inside the shed before proceeding. The 
+animal will confirm that not being inside the shed is true by inverting the result of condition IsInShed. The animal 
+will perform a random movement on pasture using custom action RandomMove when daytime holds and it is outside the shed. 
+The animal will stop evaluation after the first branch succeeds, and it will re-evaluate from the beginning whenever 
+the active branch is running.

@@ -1,0 +1,8 @@
+1. Execute actions in pipeline sequence (ComputePathToPose, then FollowPath).
+2. Execute custom action ComputePathToPose at a rate of 1.0 Hz to generate a navigation path from the current position to the specified goal using the GridBased planner.
+3. If custom action ComputePathToPose returns SUCCESS, provide the computed path as output to the next action.
+4. If custom action ComputePathToPose returns FAILURE, immediately retry computation at the next 1.0 Hz cycle.
+5. Execute ROS action FollowPath using the provided path with the FollowPath controller.
+6. If ROS action FollowPath returns RUNNING, continue monitoring path progress while allowing ComputePathToPose to recompute the path as needed at a rate of 1.0 Hz.
+7. If ROS action FollowPath returns FAILURE due to path invalidation or obstacle interference, trigger re-execution of ComputePathToPose at the next 1.0 Hz cycle.
+8. If ROS action FollowPath returns SUCCESS, terminate the pipeline sequence and report mission success.

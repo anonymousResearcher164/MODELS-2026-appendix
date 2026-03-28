@@ -1,0 +1,144 @@
+Source: Root Node → Repeat
+Dictionary Reference (Repeat Template):
+“Execute [action] a set number of times or infinitely.”
+
+REQ-1:
+The system shall execute the full tray handling sequence one time only.
+
+Source: Sequence Node
+Dictionary Reference (Sequence Template):
+“Execute [actions] in order. If [action] fails, stop sequence. If [action] is RUNNING, wait for [action] to finish. Else move to the next [action].”
+
+SEQ ACTIONS (In order):
+
+LookAtTheTray
+RetryUntilSuccessful (which contains Timeout → DetectHandles)
+PickTray
+LookUp
+MoveBack
+GoToTable
+PlaceTray
+
+REQ-2:
+The system shall execute actions in the following order: LookAtTheTray, DetectHandles, PickTray, LookUp, MoveBack, GoToTable, and PlaceTray.
+
+REQ-3:
+The system shall not begin execution of any subsequent action until the current action reports a SUCCESS condition.
+
+REQ-4:
+If any action in the sequence reports FAILURE, the system shall stop executing the remaining actions in the sequence.
+
+REQ-5:
+While any action is in progress (RUNNING), the system shall wait for it to finish before proceeding.
+
+Source: Action Node — LookAtTheTray
+(Atomic action, no modifiers)
+
+REQ-6:
+The system shall direct its sensors or vision system toward the tray to establish visual focus before handle detection begins.
+
+Source: RetryUntilSuccessful Node (num_attempts=3)
+Dictionary Reference (RetryUntilSuccessful Template):
+“Keep executing [action] until it returns SUCCESS. If retry returns FAILURE, restart [action]. Else return RUNNING.”
+
+(Note: The BT XML misspells “RetryUntilSuccessful” as “RetryUntilSuccesful,” but we use the intended meaning.)
+
+REQ-7:
+The system shall attempt to execute the DetectHandles action up to 3 times or until it succeeds.
+
+REQ-8:
+If the DetectHandles action fails within 3 attempts, the RetryUntilSuccessful node shall return FAILURE, causing the sequence to stop.
+
+Source: Timeout Node (msec=300)
+Dictionary Reference (Timeout Template):
+“If the execution of an [action] does not end within a specified duration, interrupt it and return a specific result.”
+
+REQ-9:
+The system shall limit the execution time of the DetectHandles action to a maximum of 300 milliseconds per attempt.
+
+REQ-10:
+If DetectHandles does not complete within 300 milliseconds, the Timeout node shall interrupt DetectHandles and report FAILURE for that attempt.
+
+Source: Action Node — DetectHandles
+(Atomic action executed under Timeout and Retry control)
+
+REQ-11:
+The system shall use visual or sensor data to identify the positions of tray handles during each attempt of DetectHandles.
+
+Source: Action Node — PickTray
+(Action executed after handle detection succeeds)
+
+REQ-12:
+After successful handle detection, the system shall grasp the tray using appropriate manipulators.
+
+Source: Action Node — LookUp
+(Atomic action)
+
+REQ-13:
+After picking up the tray, the system shall tilt or move its vision system upward to reorient its field of view.
+
+Source: Action Node — MoveBack
+(Atomic action)
+
+REQ-14:
+The system shall move backward from its current position after lifting the tray to create clearance from the pickup location.
+
+Source: Action Node — GoToTable
+(Atomic action)
+
+REQ-15:
+The system shall move toward the designated table area while securely holding the tray.
+
+Source: Action Node — PlaceTray
+(Final atomic action)
+
+REQ-16:
+The system shall release or place the tray on the table in a stable orientation completing one operational cycle.
+
+Traceability and Node Reference Summary
+Requirement	Source Node	Dictionary Template Reference	Behavior Purpose
+REQ-1	Repeat	Repeat	One-time mission cycle constraint
+REQ-2–REQ-5	Sequence	Sequence	Ordered execution and control flow
+REQ-6	Action (LookAtTheTray)	—	Initialize visual targeting
+REQ-7–REQ-8	RetryUntilSuccessful	RetryUntilSuccessful	Error tolerance and retry logic
+REQ-9–REQ-10	Timeout	Timeout	Safety and timing constraint
+REQ-11	Action (DetectHandles)	—	Handle detection task
+REQ-12	Action (PickTray)	—	Picking operation
+REQ-13	Action (LookUp)	—	Reorienting viewpoint
+REQ-14	Action (MoveBack)	—	Retraction maneuver
+REQ-15	Action (GoToTable)	—	Movement toward placement area
+REQ-16	Action (PlaceTray)	—	Final placement operation
+Requirement Quality Analysis
+Atomicity Check
+Each requirement expresses exactly one function, constraint, or outcome.
+✅ All REQs are atomic.
+
+Ambiguity Check
+Each statement uses “shall” statements with measurable or clearly verifiable terms (specific number of attempts, milliseconds, success/failure, order).
+✅ All REQs are unambiguous.
+
+Completeness Check
+All nodes, decorators, and composites from the tree are represented:
+
+Repeat (REQ-1)
+Sequence (REQ-2–REQ-5)
+RetryUntilSuccessful + Timeout + DetectHandles (REQ-7–REQ-11)
+Every Action node mapped (REQ-6, REQ-12–REQ-16) 
+✅ No missing behavior.
+
+Usability Check
+These requirements can be used directly by both:
+
+System designers (to implement sequence logic, timing, and retry control)
+Verification engineers (to test each step deterministically). 
+✅ They are usable and testable.
+
+Consistency Check
+Requirements follow strict control flow and numeric constraints:
+
+One-run sequence (REQ-1)
+Non-conflicting control conditions between sequence, timeout, and retry nodes. 
+✅ No logical or functional contradictions.
+
+✅ Final Assessment:
+The 16 derived requirements are atomic, unambiguous, complete, usable, and consistent, accurately translating the behavior tree semantics (Repeat → Sequence → RetryUntilSuccessful → Timeout → Actions) into formal, test-ready system mission requirements for a robot performing tray pickup and placement.

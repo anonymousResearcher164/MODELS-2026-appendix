@@ -1,0 +1,27 @@
+1. Execute child nodes sequentially within SequenceStar.
+2. Execute custom action Speak using action_name "/gcloud_tts", language "pt_PT", utterance "Tenho fome", and voice "pt-PT-Wavenet-D".
+3. If custom action Speak returns SUCCESS, remember it and move to the next action.
+4. Execute custom action WaitForXSeconds with a duration of 2 seconds and expected result SUCCESS.
+5. If custom action WaitForXSeconds returns SUCCESS, remember it and proceed to the Fallback node.
+6. Within the Fallback node, execute child nodes sequentially until one succeeds or all fail.
+7. Begin Fallback evaluation by executing a SequenceStar node.
+8. Inside the SequenceStar, execute child nodes in order, remembering successful ones.
+9. Start by executing RetryUntilSuccessful with a maximum of three attempts.
+10. Within RetryUntilSuccessful, continuously execute ROS action MoveBase using action_name "move_base", frame_id "map", and goal_pose (-1.7971; -5.5118; 0.0; 0; 0; 0.72703; 0.68659).
+11. If ROS action MoveBase returns FAILURE, retry until three attempts are made or SUCCESS is achieved.
+12. If ROS action MoveBase returns SUCCESS, remember success and proceed to the next node.
+13. Execute a Parallel node with failure_threshold = 1 and success_threshold = 2.
+14. Inside the Parallel node, execute custom action Charge using action_name "charging_action" and action "CHARGE" simultaneously with a Repeat node.
+15. Within the Repeat node, execute custom action Speak using action_name "/gcloud_tts", language "pt_PT", utterance "bip bip", and voice "pt-PT-Wavenet-D" for 5 cycles.
+16. If success threshold (2) is reached among child nodes in the Parallel group, the Parallel node returns SUCCESS.
+17. If failure threshold (1) is reached among child nodes in the Parallel group, the Parallel node returns FAILURE.
+18. If the SequenceStar inside the Fallback returns SUCCESS, the Fallback node returns SUCCESS and stops execution.
+19. If the SequenceStar inside the Fallback returns FAILURE, the Fallback continues to other children (none exist), resulting in FAILURE.
+20. If the Fallback node returns SUCCESS, remember it and proceed in the SequenceStar.
+21. Execute custom action WaitForXSeconds with a duration of 10 seconds and expected result SUCCESS.
+22. If custom action WaitForXSeconds returns SUCCESS, remember it and move to the next action.
+23. Execute custom action Speak using action_name "/gcloud_tts", language "pt_PT", utterance "Estou cheio, vou sair da estação", and voice "pt-PT-Wavenet-D".
+24. If custom action Speak returns SUCCESS, remember it and proceed to the next action.
+25. Execute custom action Charge using action_name "charging_action" and action "STOP_CHARGE".
+26. If custom action Charge returns SUCCESS, remember it and complete SequenceStar execution.
+27. If any action in SequenceStar fails, restart the sequence from the first action Speak.

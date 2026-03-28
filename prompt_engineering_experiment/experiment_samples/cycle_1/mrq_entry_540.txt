@@ -1,0 +1,38 @@
+R1 — Initialization of Speech Sequence
+The robot shall begin a speech sequence that executes designated actions in order, maintaining execution memory for already completed actions.
+If any action fails, the sequence memory shall reset and the sequence shall start over on the next attempt.
+Node Context: <SequenceStar> (treated as SequenceWithMemory)
+
+R2 — Speak Configured Message
+The robot shall execute the SaySomething action.
+When this action completes successfully, the system shall proceed to the next action.
+If this action fails, the system shall restart the entire sequence.
+If the action is still RUNNING (e.g., ongoing playback), the sequence shall wait until it finishes.
+Code Reference: <Action ID="SaySomething"/>
+
+R3 — Default Greeting Output
+After successfully saying something, the robot shall execute the SayHello action, which produces a greeting message of type “Hello”.
+When this action executes successfully, the sequence is complete.
+If the SayHello action fails, the system shall reset memory and start the full sequence again from SaySomething.
+Code Reference: <Action ID="SayHello"/>
+
+R4 — Memory-Based Execution Behavior
+The sequence shall remember which actions have already returned SUCCESS; thus, if a later action is still running when re-evaluated, the sequence resumes from the last known successful child.
+Derived from: SequenceWithMemory template.
+
+🔍 Validation Checks
+Criterion	Description & Result
+Atomicity	Each requirement captures one behavior: sequence initialization (R1), message speech (R2), greeting (R3), and memory logic (R4). ✔
+Ambiguity	All action names and outcomes (SUCCESS, FAILURE, RUNNING) are explicitly stated and linked to node semantics. ✔
+Completeness	Every node in the tree (SequenceStar, SaySomething, SayHello) is represented. No missing conditions or assumptions. ✔
+Usability	Requirements directly specify control flow and speech behavior implementable by a robotics, simulation, or dialogue framework. ✔
+Consistency	Requirements match the SequenceWithMemory semantics: ordered, restart‑on‑failure, resume‑on‑success. No contradictions. ✔
+✅ Final Summary:
+The SayStuff behavior tree defines a simple ordered speech routine.
+The robot shall:
+
+Initiate a memory-preserving sequence.
+Say something
+Then say a greeting (“Hello”).
+Resume appropriately if interrupted and restart from the beginning on any failure.
+These R1–R4 requirements are atomic, unambiguous, complete, usable, and consistent relative to the dictionary semantics.

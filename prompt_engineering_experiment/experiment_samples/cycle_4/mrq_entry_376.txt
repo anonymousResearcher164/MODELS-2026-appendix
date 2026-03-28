@@ -1,0 +1,13 @@
+The behavior tree describes a repeated human-robot interaction and social navigation routine executed in a strict 
+sequence. The robot will execute actions in order and will stop the sequence if any action fails or will wait if 
+an action is still running before moving to the next action. The robot will execute custom action Repeat a set 
+number of times or infinitely by running its child actions a set number of times for 100 cycles. The robot will 
+execute a series of actions simultaneously within the parallel block and will consider the execution successful 
+when the configured success threshold is reached or all actions succeed, and it will consider the execution failed 
+if any action fails according to the configured failure threshold. The robot will execute custom action Dialog 
+concurrently with other actions during each parallel cycle. The robot will execute custom action SocialNav2Action 
+concurrently with other actions during each parallel cycle. The robot will treat the parallel block as successful 
+if at least one action succeeds due to a success_threshold of 1. The robot will treat the parallel block as failed 
+if any action fails due to a failure_threshold of 1. The robot will repeat the parallel execution for 100 iterations 
+because the repeat node specifies num_cycles equal to 100. The robot will complete the overall sequence after the 
+repeat node finishes its 100 iterations.

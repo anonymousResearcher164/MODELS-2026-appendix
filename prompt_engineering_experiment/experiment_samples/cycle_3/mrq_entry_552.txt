@@ -1,0 +1,13 @@
+1. Execute the following actions repeatedly without limit.
+2. Begin each iteration by executing a sequence of actions in the specified order.
+3. Execute the custom action TrayUpdatePlanningScene to synchronize the planning scene with the current environment state.
+4. Execute the ROS action MoveBase with goal coordinates (2.1, -2.0, 0.0) to navigate the robot to the designated position.
+5. Upon successful arrival, execute the ROS action MoveBase with goal coordinates (2.1, 0.0, 1.57) to orient the robot toward the shelf area.
+6. Execute the following sub-sequence of actions in order: 
+    6.1. Execute the custom action TorsoControl to adjust the torso height by a relative value of 0.1 meters. 
+    6.2. Execute the custom action HeadControl to set the head pitch to 0.0 radians and yaw to 90.0 degrees. 
+    6.3. Execute the custom action ScanShelves using the parameter {tomato_can_stocking_target_poses} to detect and record target stocking positions for tomato cans. 
+    6.4. Execute the custom action TraySetLoci to assign loci on the tray named “shelf” using {tomato_can_stocking_target_poses} and mark them as unoccupied. 
+    6.5. Execute the custom action TrayUpdatePlanningScene to update the planning scene with the new tray loci configuration.
+7. Execute the custom action Pause for a duration of 5 seconds before restarting the sequence.
+8. After the pause, restart the entire sequence from Step 3 and continue indefinitely.

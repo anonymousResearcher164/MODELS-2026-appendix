@@ -1,0 +1,8 @@
+The mission describes a repeated back-and-forth navigation routine between two fixed poses over a bounded number 
+of cycles.
+
+First, the robot will execute the following actions (the custom action NavigateToAction, the custom action 
+NavigateToAction) in order and stop the sequence if any action fails. The robot will execute the custom action 
+NavigateToAction to reach the target pose at coordinates 0.5;0.5;0. It will then execute the custom action 
+NavigateToAction to reach the target pose at coordinates -0.5;-0.5;0. Next, it will execute the custom action Repeat 
+for a set number of times or infinitely. It will execute the sequence for a set number of times equal to 10.

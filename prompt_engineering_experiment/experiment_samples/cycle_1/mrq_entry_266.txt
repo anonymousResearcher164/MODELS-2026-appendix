@@ -1,0 +1,59 @@
+R1 — Object Identification
+Requirement:
+The robot shall obtain the pickable object’s pose by executing the GetPickObject action using the identifier {object_id} provided by the mission context.
+
+Code Reference:
+<GetPickObject name="get_pose_from_object" object_id="{object_id}"/>
+
+R2 — Placement Pose Retrieval
+Requirement:
+The robot shall determine a valid placing pose for the identified object by executing the GetPlacingPose action with the {object_id} and store this pose in {pose}.
+
+Code Reference:
+<GetPlacingPose name="get_placing_pose" object="{object_id}" ob_pose="{pose}"/>
+
+R3 — Approach to Object
+Requirement:
+The robot shall move its manipulator or base toward the place location defined by {pose} by executing the ApproachObject action.
+
+Code Reference:
+<ApproachObject name="approach_object" object_pose="{pose}"/>
+
+R4 — Placement Execution
+Requirement:
+The robot shall place the object at the goal pose {pose} by executing the PlaceSimple action.
+
+Code Reference:
+<PlaceSimple name="place" goal="{pose}"/>
+
+R5 — Sequential Execution Logic
+Requirement:
+The robot shall execute the sequence of actions (GetPickObject, GetPlacingPose, ApproachObject, PlaceSimple) in order. If any action fails, the system shall stop the sequence and return a failure status for the entire “place” operation.
+
+Code Reference:
+<Sequence name="place"> [...] </Sequence>
+
+R6 — Action Execution Timing
+Requirement:
+If any action within the “place” sequence returns a RUNNING status, the system shall wait for that action to complete before proceeding to the next action.
+
+Code Reference:
+Behavior template for Sequence node.
+
+Validation Checks
+Atomicity Check
+Each requirement focuses on one distinct aspect of the behavior (pose retrieval, pose computation, approach, placement, sequence logic, timing). 
+✔ All requirements are atomic.
+Ambiguity Check
+Each requirement uses explicit terms (“shall”, “stop the sequence”, “store in {pose}”, “provided by mission context”) that have one clear meaning. 
+✔ All requirements are unambiguous.
+Completeness Check
+The requirements together cover all operations in the defined behavior tree and include the control logic of the Sequence node. No behavior element is omitted. 
+✔ The requirements set is complete.
+Usability Check
+These requirements can guide a system developer or mission planner in designing, coding, verifying, and validating the robot’s placing behavior directly from the tree. 
+✔ Requirements are usable.
+Consistency Check
+Control sequence, failure handling, and timing requirements align with the dictionary definition without contradiction. ✔ Requirements are consistent.
+✅ Summary:
+The above set (R1–R6) provides a fully traceable, atomic, unambiguous, complete, usable, and consistent system-level specification derived from the given behavior tree and node dictionary.

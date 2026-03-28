@@ -1,0 +1,21 @@
+The behavior tree describes a robot that will continuously monitor for a specific human pose and capture 
+images whenever the pose is detected. The robot will execute a series of child nodes in order from left to 
+right. The robot will first set the blackboard key pose_name_l to TouchingNeck. The robot will then set the 
+blackboard key pose_name_r to TouchingNeck. The robot will then set the blackboard key pose_lr_check to any. 
+The robot will then execute custom action AntennaAction with rate 0, intensity 0, and blink patterns 0 and 
+will complete this action before proceeding. The robot will then execute a loop that will keep re-running as 
+long as its child sequence does not fail. The robot will execute a series of child nodes in order within the 
+loop. The robot will execute a child sequence that is forced to succeed unless it is still running. The robot 
+will execute custom action HumanPoseDetect using expected_pose_left from pose_name_l, expected_pose_right 
+from pose_name_r, and pose_lr_check from pose_lr_check and will output detected_person, pose_left_speech, and 
+pose_right_speech. The robot will then execute custom action AntennaAction with rate 0, intensity 10, and 
+blink patterns 10 for both sides. The robot will then execute custom action SaveImageAction and will save an 
+image to /home/ubuntu/saved_images with a filename pattern image#.jpg. The robot will then execute custom action 
+TextToSpeechActionClient and will speak the word Saved. The robot will then execute custom action AntennaAction 
+with rate 0, intensity 0, and blink patterns 0 for both sides. The robot will treat the entire pose-detection-and-save 
+sequence as a success regardless of the actual result, unless the sequence is still running. The robot will then 
+execute a delay wrapper that will run its child and then hold the running state for 1000 milliseconds before 
+reporting success. The robot will execute setting blackboard key dummy to 0 as the delayed child action. The 
+robot will restart the looped sequence after the delay completes because the loop will return success when 
+the inner sequence succeeds and will continue running. The robot will stop the loop only if any child in the 
+looped sequence fails.

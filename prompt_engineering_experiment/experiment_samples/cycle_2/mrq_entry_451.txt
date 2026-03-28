@@ -1,0 +1,18 @@
+1. Execute child nodes sequentially within a Fallback control structure.
+2. Begin by executing the SequenceStar node named “Main.”
+3. Within SequenceStar “Main,” execute actions in order: first custom action GetTarget, then custom action Move, then a nested Sequence node.
+4. If custom action GetTarget returns SUCCESS, remember its success and proceed to custom action Move.
+5. If custom action GetTarget returns FAILURE, restart the SequenceStar “Main” from the beginning.
+6. If custom action Move returns SUCCESS, remember its success and proceed to the nested Sequence node.
+7. If custom action Move returns FAILURE, restart the SequenceStar “Main” from the beginning.
+8. Within the nested Sequence node, first check condition TargetAdjacent.
+9. If condition TargetAdjacent is true, execute custom action AttackTarget.
+10. If condition TargetAdjacent is false, stop the nested Sequence and return FAILURE.
+11. If custom action AttackTarget returns SUCCESS, the nested Sequence returns SUCCESS.
+12. If custom action AttackTarget returns FAILURE, the nested Sequence returns FAILURE.
+13. If the nested Sequence returns SUCCESS, remember it and complete the SequenceStar “Main.”
+14. If any component of SequenceStar “Main” returns FAILURE, restart from the first action (GetTarget).
+15. If the entire SequenceStar “Main” returns SUCCESS, the Fallback control structure returns SUCCESS and the mission completes.
+16. If the entire SequenceStar “Main” returns FAILURE, execute custom action RandomMove as the fallback behavior.
+17. If custom action RandomMove returns SUCCESS, the Fallback returns SUCCESS.
+18. If custom action RandomMove returns FAILURE, the Fallback returns FAILURE, and the mission ends unsuccessfully.

@@ -1,0 +1,23 @@
+1. Execute the recovery node NavigateRecovery, allowing up to 6 retry attempts before declaring overall mission failure.
+2. Within NavigateRecovery, execute the PipelineSequence NavigateWithReplanning consisting of ComputePathToPose and FollowPath actions.
+3. Within the PipelineSequence, execute ComputePathToPose at a controlled rate of 1.0 Hz.
+4. Within ComputePathToPose, attempt up to 1 retry to generate a valid path using the GridBased planner from the current position to the specified goal.
+5. If the ComputePathToPose action fails on its first attempt, execute ClearEntireCostmap-Context to clear the global costmap via the service global_costmap/clear_entirely_global_costmap.
+6. After clearing the global costmap, reattempt ComputePathToPose once to recompute a new path.
+7. If ComputePathToPose succeeds, output the computed path for use by the FollowPath action and proceed in the sequence.
+8. Execute FollowPath under a recovery node allowing up to 1 retry attempt using the controller FollowPath.
+9. If FollowPath fails on its first attempt, execute ClearEntireCostmap-Context to clear the local costmap via the service local_costmap/clear_entirely_local_costmap.
+10. After clearing the local costmap, reattempt FollowPath once using the same path input.
+11. If FollowPath returns RUNNING, continue monitoring navigation progress while allowing ComputePathToPose to recompute paths at 1.0 Hz as needed.
+12. If FollowPath returns SUCCESS, terminate the PipelineSequence successfully and return SUCCESS to NavigateRecovery.
+13. If the PipelineSequence NavigateWithReplanning fails after all retries, execute the ReactiveFallback RecoveryFallback.
+14. Within ReactiveFallback, first check if GoalUpdated returns SUCCESS. If it does, stop recovery and return SUCCESS (goal updated).
+15. If GoalUpdated returns FAILURE, execute the SequenceStar RecoveryActions subtree.
+16. Within RecoveryActions, execute ClearLocalCostmap-Subtree to clear the local costmap using the service local_costmap/clear_entirely_local_costmap.
+17. If ClearLocalCostmap-Subtree returns SUCCESS, execute ClearGlobalCostmap-Subtree to clear the global costmap using the service global_costmap/clear_entirely_global_costmap.
+18. If ClearGlobalCostmap-Subtree returns SUCCESS, execute Spin to rotate the robot by 1.57 radians in place.
+19. If Spin returns SUCCESS, execute Wait for a duration of 5 seconds before proceeding.
+20. If any action in the RecoveryActions sequence fails, restart the entire sequence from ClearLocalCostmap-Subtree.
+21. If all actions in the RecoveryActions sequence succeed, return SUCCESS to ReactiveFallback and complete the recovery process.
+22. If ReactiveFallback fails after all child evaluations, increment the retry counter of NavigateRecovery and attempt recovery again, up to 6 total retries.
+23. If all 6 NavigateRecovery attempts fail, terminate the mission with an overall FAILURE status.

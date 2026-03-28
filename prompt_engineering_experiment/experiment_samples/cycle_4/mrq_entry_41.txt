@@ -1,0 +1,6 @@
+The behavior tree describes a sequential pick preparation and grasp procedure executed from start to finish. 
+The robot will execute actions in order and stop the sequence if any action fails or is still running. 
+The robot will run custom action CheckBattery first and will only continue if it succeeds. The robot will 
+run custom action OpenGripper next and will only continue if it succeeds. The robot will run custom action 
+ApproachObject next and will only continue if it succeeds. The robot will run custom action CloseGripper 
+last and will report overall success only if this action succeeds.

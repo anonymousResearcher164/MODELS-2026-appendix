@@ -1,0 +1,198 @@
+[System message]
+You are an expert systems engineer specialized in converting behavioral models into mission descriptions. 
+I will provide you with a behavior tree that describes a real-world robot's behavior. Do keep your answer 
+as simple text with a mix of imperative and descriptive language. Format your response as a paragraph. 
+Strictly use the dictionary provided, as a reference to interpret behavior control of the corresponding node types. 
+Avoid redundant ending statements. Use the example given to guide your sentence fluency
+
+[Prompt messages]
+Your task is to generate a clear, documentation-style explanation of the behavior in the behavior tree 
+that satisfies the following constraints:
+1. Each statement must contain a single thought.
+2. Each statement must have a single interpretation.
+3. Each statement should be capable of standing alone without missing conditions or assumptions.
+4. Each statement should be intuitive such that it can be understood with low cognitive effort.
+5. Statements should not contradict each other.
+
+Begin your explanation with context that defines the scope of the behavior in the behavior tree. 
+Formulate this as "The behavior tree describes [followed by the scope of the behavior in the behavior tree]". 
+Subsequent statements should be formulated in the third-person future tense. Integrate the semantics of the 
+behavior tree nodes into the behavior descriptions of the robot.
+
+[Chat prompt]
+Dictionary:
+<<<BEGIN_DICTIONARY>>>
+{
+  "title": "Dictionary for Interpreting Behavior Control and Modification",
+  "nodes": [
+    {
+      "nodeType": "Sequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] fails, stop the sequence. Else if [Action] is still running, wait for [Action] to finish. Else move to the next [Action]."
+    },
+    {
+      "nodeType": "SequenceWithMemory, SequenceStar",
+      "naturalLanguageDescription": "Execute a series of child nodes in order, from left to right, remembering which ones have already succeeded.",
+      "behaviorTemplate": "Execute [Actions] in sequence. If [action] succeeds, remember it and move to the next. If [Action] fails, start the sequence again from the beginning."
+    },
+    {
+      "nodeType": "Switch",
+      "naturalLanguageDescription": "Execute child node based on blackboard value.",
+      "behaviorTemplate": "Read blackboard value. Compare value against a set of cases. If case value matches switch value execute corresponding [Action]. Else if no case matches, execute default [Action]."
+    },
+    {
+      "nodeType": "WhileDoElse",
+      "naturalLanguageDescription": "Execute a node while a condition is true else execute and alternative node if that same condition fails.",
+      "behaviorTemplate": "While [Condition], do [Action]. If [!Condition], execute alternative [Action]."
+    },
+    {
+      "nodeType": "Loop",
+      "naturalLanguageDescription": "Repeatedly execute a child node for a specified number of iterations, until a specific status is returned or forever.",
+      "behaviorTemplate": "Execute [Action] continuously until it fails or succeeds. Else keep executing [Action] forever."
+    },
+    {
+      "nodeType": "Parallel",
+      "naturalLanguageDescription": "Execute multiple child nodes simultaneously, ensuring all are completed successfully.",
+      "behaviorTemplate": "Execute a series of [Actions] simultaneously. If a success threshold is reached or all [Actions] succeed, the execution was successful. Else if any action fails, the execution fails."
+    },
+    {
+      "nodeType": "Fallback",
+      "naturalLanguageDescription": "Execute child nodes sequentially from left to right, until one succeeds or all fail.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] returns fails, move to the next [Action] until any [Action] succeeds. If no [Action] returns succeeds, the execution fails."
+    },
+    {
+      "nodeType": "ForceSuccess",
+      "naturalLanguageDescription": "Force child node to succeed regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always succeeds, unless the [Action] is still running."
+    },
+    {
+      "nodeType": "ForceFailure",
+      "naturalLanguageDescription": "Force child node to fail regardless of the conditions.",
+      "behaviorTemplate": "Execute [Action] but make sure it always fails when it is complete."
+    },
+    {
+      "nodeType": "RepeatUntilSuccess",
+      "naturalLanguageDescription": "Repeatedly execute child node until success is achieved.",
+      "behaviorTemplate": "Continuously execute [Action] until it succeeds. Then stop [Action] execution and return success."
+    },
+    {
+      "nodeType": "Retry",
+      "naturalLanguageDescription": "Retry the execution of a child node for either a fixed number of times or until the node is executed successfully.",
+      "behaviorTemplate": "Continuously execute [Action] whenever it fails. Repeat for a specified retry count or until it succeeds."
+    },
+    {
+      "nodeType": "ReactiveSequence",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, re-evaluate previous child nodes.",
+      "behaviorTemplate": "Execute [Actions] in order. If [Action] succeeds, move to the next. If [Action] fails, stop. If [Action] returns is still running, re-evaluate previous [Actions] in order."
+    },
+    {
+      "nodeType": "ReactiveFallback",
+      "naturalLanguageDescription": "Execute a series of child nodes in order from left to right. While a later node is running, restart evaluation from node 0.",
+      "behaviorTemplate": "Execute a series of [Actions] in order. If [Action] succeeds, stop execution. Else keep executing and re-evaluate previous [Actions] in order, whenever an [Action] is in execution."
+    },
+    {
+      "nodeType": "Repeat",
+      "naturalLanguageDescription": "Execute a set of child nodes multiple times.",
+      "behaviorTemplate": "Execute [Action] a set number of times or infinitely."
+    },
+    {
+      "nodeType": "BlackboardCheckValue",
+      "naturalLanguageDescription": "Check if a value in memory can be either true or false matches the expected value.",
+      "behaviorTemplate": "Look up a value in the blackboard and check if it matches a given rule."
+    },
+    {
+      "nodeType": "Delay",
+      "naturalLanguageDescription": "Wait for a given duration before running or returning a result from the associated child node.",
+      "behaviorTemplate": "Execute [Action]. If the [Action] succeeds, start delay timer. While delay is active, [Action] is till running. After delay is exhausted, [Action] succeeds."
+    },
+    {
+      "nodeType": "Inverter",
+      "naturalLanguageDescription": "Negate a condition.",
+      "behaviorTemplate": "Execute an [Action]. If [Action] succeeds or fails return the opposite."
+    },
+    {
+      "nodeType": "KeepRunningUntilFailure",
+      "naturalLanguageDescription": "Keep re-running child node as long as it does not fail.",
+      "behaviorTemplate": "Execute [Action]. If [Action] succeeds, restart it and keep running. Else if [Action] fails, stop looping and return a success."
+    },
+    {
+      "nodeType": "RetryUntilSuccessful",
+      "naturalLanguageDescription": "Continuously retry a child node until it succeeds.",
+      "behaviorTemplate": "Keep executing [Action] until it succeeds. If retry fails, restart [Action]."
+    },
+    {
+      "nodeType": "RecoveryNode",
+      "naturalLanguageDescription": "Try to run the primary child node. If it fails, run the next child node to recover and try to execute the primary child node again until retries are exhausted.",
+      "behaviorTemplate": "Execute main [Action]. If main [Action] succeeds, return success. If main [Action] fails, execute next [Action] as recovery. After recovery, retry main [Action]. If recovery [Action] fails and retries are exhausted, stop execution."
+    },
+    {
+      "nodeType": "Timeout",
+      "naturalLanguageDescription": "Execute child node, but only for a maximum duration.",
+      "behaviorTemplate": "If the execution of [Action] does not end within a specified duration, interrupt it and return a specific result."
+    },
+    {
+      "nodeType": "[Action]",
+      "naturalLanguageDescription": "A child node name",
+      "behaviorTemplate": "If action name is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Actions]",
+      "naturalLanguageDescription": "A series of child node names",
+      "behaviorTemplate": "For each action name, if it is a standard ROS action, refer to it as: ROS action [insert action name]. Else refer to it as: custom action [insert action name]"
+    },
+    {
+      "nodeType": "[Condition]",
+      "naturalLanguageDescription": "A check that returns success",
+      "behaviorTemplate": "[condition ID] is true"
+    },
+    {
+      "nodeType": "[!Condition]",
+      "naturalLanguageDescription": "A check that returns failure",
+      "behaviorTemplate": "[condition ID] is false"
+    }
+  ]
+}
+<<<END_DICTIONARY>>>
+
+Example:
+<<<BEGIN_EXAMPLE>>>
+<?xml version="1.0"?>
+  <root main_tree_to_execute = "MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="root_sequence">
+      <GoPoint goal="{destination}"/>
+      <GoObject target="{object}"/>
+    </Sequence>
+  </BehaviorTree>
+</root>
+
+The behavior tree is a simple sequential task for a robot. It first instructs
+the robot to move to a specific point (GoPoint) and then to interact with
+a particular object (GoObject). The robot will execute these tasks in
+sequence, moving to the specified destination before interacting with the
+designated object.
+<<<END_EXAMPLE>>>
+
+Behavior Tree:
+<?xml version="1.0"?>
+<root main_tree_to_execute="BehaviorTree">
+    <!-- ////////// -->
+    <BehaviorTree ID="BehaviorTree">
+        <Sequence>
+            <Action ID="SaySomething" message="Start thinking..."/>
+            <Action ID="ThinkWhatToSay" text="{the_answer}"/>
+            <Action ID="SaySomething" message="{the_answer}"/>
+        </Sequence>
+    </BehaviorTree>
+    <!-- ////////// -->
+    <TreeNodesModel>
+        <Action ID="SaySomething">
+            <input_port default="&quot;Start thinking...&quot;" name="message"/>
+        </Action>
+        <Action ID="ThinkWhatToSay">
+            <output_port default="{the_answer}" name="text"/>
+        </Action>
+    </TreeNodesModel>
+    <!-- ////////// -->
+</root>
+<<<END_BEHAVIOR_TREE>>>

@@ -1,0 +1,21 @@
+The mission describes autonomous localization that will either use an existing initial pose or perform a bounded 
+self-localization routine with retries until one method succeeds.
+
+First, it will execute the following actions (initialPoseReceived, doSelfLocalization) consecutively. If any 
+action (initialPoseReceived or doSelfLocalization) fails, it will move to the next action until an action succeeds. 
+If no action succeeds, it will start all over again until an action succeeds.
+
+Next, the robot will execute the following actions (retry_client_request, retry_localization) in sequence. If any 
+action fails, it will start the sequence again from the beginning.
+
+Next, it will keep trying to execute the custom action globalLocalizationServiceRequest until it succeeds. If the 
+try succeeds, it will stop retrying and continue. If the try fails, it will keep retrying until it succeeds.
+
+Finally, it will keep trying to execute the following actions in sequence until they succeed. It will execute the 
+following actions (Fallback, IsLocalized) consecutively. If any action (Fallback or IsLocalized) fails, it will 
+move to the next action until an action succeeds. If no action succeeds, it will start all over again until an 
+action succeeds. It will execute the following actions (IsLocalized, SequenceStar) consecutively. If any action 
+(IsLocalized or SequenceStar) fails, it will move to the next action until an action succeeds. If no action 
+succeeds, the execution fails. It will execute the following actions (Spin, BackUp, Spin) in sequence. If any 
+action succeeds, it will remember it and move to the next. If any action fails, it will start the sequence again 
+from the beginning.

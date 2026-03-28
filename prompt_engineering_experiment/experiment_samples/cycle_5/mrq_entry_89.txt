@@ -1,0 +1,5 @@
+The mission describes a navigation task that computes a path to a goal and then follows that path in strict order. 
+First, the robot will execute the following actions (ComputePathToPose, FollowPath) in order and stop the sequence 
+if any action fails. It will run the ROS action ComputePathToPose with the goal provided and will store the resulting 
+path. It will run the ROS action FollowPath using the stored path with the specified controller after the path 
+computation succeeds.

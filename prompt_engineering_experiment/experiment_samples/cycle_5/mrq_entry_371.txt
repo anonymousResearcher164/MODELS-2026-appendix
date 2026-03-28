@@ -1,0 +1,33 @@
+The mission describes a repeated control loop that evaluates high-level temporal logic progress, reacts to 
+runtime events and action types, executes the selected action, and updates the plan state.
+
+First, it will execute the following actions (LTLPreCheck, ReplanningRequestLevel2) consecutively. It will execute 
+the following actions (LTLPreCheck, ReplanningRequestLevel2) consecutively and will stop when one succeeds or all 
+fail. It will find a value on the blackboard and check if it matches a given rule. It will execute the ROS action 
+ReplanningRequestLevel2 and make sure it always fails. It will move to ReplanningRequestLevel2 only if LTLPreCheck 
+fails. It will consider this fallback successful if LTLPreCheck succeeds.
+
+Next, it will execute the following actions [FakeDetectionLevel1 or ReplanningRequestLevel1, ReactiveLTLStateCheck 
+or ReplanningRequestLevel2, FakeDetectionLevel3 or ReplanningRequestLevel3, Switch4 or ReplanningRequestLevel3] in 
+sequence. It will stop execution if any of these actions fails. While any later action is still running, it will 
+re-evaluate previous actions. It will execute the following actions (FakeDetectionLevel1, ReplanningRequestLevel1) 
+consecutively. If any action fails, it will move to the next action until an action succeeds. If no action succeeds, 
+it will start all over again until an action succeeds. It will execute the ROS action FakeDetectionLevel1. It will 
+execute the ROS action ReplanningRequestLevel1 and make sure it always fails. It will execute the following actions 
+(ReactiveLTLStateCheck, ReplanningRequestLevel2) consecutively. If any action fails, it will move to the next action 
+until an action succeeds. If no action succeeds, it will start all over again until an action succeeds. It will find 
+a value on the blackboard and check if it matches a given rule. It will execute the ROS action ReplanningRequestLevel2 
+and make sure it always fails. It will execute the following actions (FakeDetectionLevel3, ReplanningRequestLevel3) 
+consecutively. If any action fails, it will move to the next action until an action succeeds. If no action succeeds, 
+it will start all over again until an action succeeds. It will execute the ROS action FakeDetectionLevel3. It will 
+execute the ROS action ReplanningRequestLevel3 and make sure it always fails. It will read blackboard value and 
+compare it against a set of cases. If a case matches the blackboard value, it will execute corresponding action 
+among the ROS actions MoveAction, StayAction, GuideAction, BackNormalAction. Else if no case matches, it will 
+execute default action that always fails. It will execute the following actions (Switch4, ReplanningRequestLevel3) 
+consecutively. If any action fails, it will move to the next action until an action succeeds. If no action succeeds, 
+it will start all over again until an action succeeds. It will execute the ROS action ReplanningRequestLevel3 and 
+make sure it always fails.
+
+Finally, the robot will execute the ROS action UpdateLTL. It will produce the next bt_action_type and current_action. 
+It will update the desired action sequence with the executed action. It will complete the sequence only if all 
+prior parts of the sequence have succeeded. It will execute this sequence for a set number of times or infinitely.

@@ -1,0 +1,26 @@
+The behavior tree describes a repeated navigation-and-recovery mission that follows an LTL-guided action sequence. 
+The robot will execute a Repeat that will run the contained Sequence for a configured number of cycles. The robot 
+will execute the Sequence in order and stop if any step fails. The robot will execute a Fallback that will first 
+try custom action LTLPreCheck and will move on only if it succeeds. The robot will execute custom action LTLPreCheck 
+to verify that the current LTL state matches the desired sequence. The robot will execute custom action 
+ReplanningRequestLevel2 under ForceFailure to always fail when complete. The robot will continue past the Fallback 
+only if custom action LTLPreCheck succeeds or if all prior actions fail, which will result in the Fallback failing 
+and the Sequence stopping. The robot will execute a ReactiveSequence that will reevaluate earlier steps while later 
+steps are running. The robot will execute a Fallback that will first try RetryUntilSuccessful on a locomotion 
+readiness branch. The robot will keep executing the locomotion readiness branch until it succeeds, restarting it 
+after each failure. The robot will execute a Fallback that will first try custom action LocomotionStatusCheck. 
+The robot will proceed if custom action LocomotionStatusCheck succeeds. The robot will execute a Sequence that will 
+attempt recovery if the check fails. The robot will execute custom action RecoveryStand and will stop this Sequence 
+if it fails. The robot will execute a Delay wrapping custom action LocomotionStart with a 5000 ms delay after success. 
+The robot will treat custom action LocomotionStart as running during the delay and as succeeded after the delay elapses. 
+The robot will complete the locomotion readiness Fallback when either the status check succeeds or the recovery 
+Sequence succeeds. The robot will execute custom action ReplanningRequestLevel3 under ForceFailure to always fail 
+when complete. The robot will have the locomotion Fallback fail only if both the readiness branch keeps failing 
+within retries and the forced-failure branch runs, which will cause the ReactiveSequence to stop. The robot will 
+execute a second Fallback that will first try custom action MoveAction. The robot will proceed if custom action 
+MoveAction succeeds. The robot will execute custom action ReplanningRequestLevel3 under ForceFailure to always fail 
+when complete. The robot will have the movement Fallback succeed only if custom action MoveAction succeeds. The 
+robot will have the ReactiveSequence re-evaluate the locomotion Fallback while custom action MoveAction is running. 
+The robot will execute custom action UpdateLTL after the ReactiveSequence succeeds. The robot will execute custom 
+action UpdateLTL to update the action sequence, to refresh the desired LTL sequence, and to output the next 
+navigation goal. The robot will repeat the entire Sequence for the specified number of cycles.

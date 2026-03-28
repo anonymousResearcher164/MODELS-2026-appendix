@@ -1,0 +1,10 @@
+The mission describes a navigation task that continuously updates a goal, replans a path, and follows the 
+path with reactive progression. First, the robot will execute the following actions (RateController, 
+KeepRunningUntilFailure) in order and stop the sequence if any action fails. Next, it will, while an action 
+is running or has succeeded, go to the next action. Next, it will run the RateController at 2.0 Hz to tick 
+its child sequence at a fixed rate. Next, it will execute the following actions (GoalUpdater) in order and 
+stop the sequence if any action fails. Next, it will use the custom action GoalUpdater to transform the input 
+goal into an updated goal. Next, it will run the ROS action ComputePathToPose to produce a path to the updated 
+goal using the GridBased planner. Next, it will execute FollowPath while it does not fail. Next, it will, if 
+FollowPath succeeds, restart it. Next, it will, if FollowPath fails, stop looping and continue execution. Next, 
+it will run the ROS action FollowPath to track the path using the FollowPath controller.

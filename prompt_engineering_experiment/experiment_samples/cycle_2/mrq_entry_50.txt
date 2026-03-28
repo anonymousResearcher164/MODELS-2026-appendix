@@ -1,0 +1,10 @@
+1. Execute actions in sequence (FixRudder, then DelayFor).
+2. Execute custom action FixRudder with parameters depth = 1.0, rudder = 2.0, and speed_knots = 3.0.
+3. If custom action FixRudder fails, stop sequence execution and do not proceed to DelayFor.
+4. If custom action FixRudder is still running, wait for its completion before proceeding.
+5. Once custom action FixRudder succeeds, execute custom action DelayFor with a delay duration of 1000 milliseconds.
+6. Execute custom action AlwaysSuccess within DelayFor.
+7. If custom action AlwaysSuccess returns SUCCESS, start the delay timer of 1000 milliseconds.
+8. While the delay timer is active, maintain the DelayFor node in RUNNING state.
+9. After the delay timer expires, return SUCCESS for DelayFor.
+10. Upon successful completion of DelayFor, return SUCCESS for the entire Sequence.

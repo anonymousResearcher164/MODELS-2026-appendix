@@ -1,0 +1,11 @@
+The behavior tree describes a grasp generation pipeline for a robot that processes a tabletop scene, 
+optionally isolates a desired object, and generates grasp candidates. The robot will execute actions in 
+sequence and will stop if any action fails or will wait if an action is still running before moving to the 
+next action. The robot will continuously execute custom action TableTopSegmentation until it succeeds, and 
+it will retry up to three attempts before moving on once success is achieved. The robot will skip the conditional 
+object isolation branch because the condition is explicitly false, and it will therefore not execute its child actions. 
+The robot will not read the blackboard entry desired_object in this run because the conditional branch will not be 
+entered. The robot will not execute custom action ObjectCloudExtraction because the conditional branch will not be 
+entered. The robot will not execute custom action TableTopClustering because the conditional branch will not be 
+entered. The robot will execute custom action GenerateGraspingCandidates after successful tabletop segmentation 
+and will produce grasp_candidates using object_cloud, table_height, and original_cloud_transformed.

@@ -1,0 +1,9 @@
+1. Execute the following actions repeatedly for three complete cycles.
+2. Within each cycle, execute the following actions in sequence.
+3. First, execute the ROS action SpeechToTextActionClient using the input parameter {said} to convert spoken input into text.
+4. If SpeechToTextActionClient returns SUCCESS, execute the ROS action TextToSpeechActionClient using the message {said} to convert the recognized text back into speech.
+5. If TextToSpeechActionClient returns SUCCESS, execute the ROS action SpeechToTextActionClient again using the input parameter {said} to capture the next spoken input.
+6. If the second SpeechToTextActionClient returns SUCCESS, execute the ROS action TextToSpeechActionClient again using the message {said} to convert the new recognized text back into speech.
+7. If any action in the sequence returns FAILURE, stop the current sequence and terminate the current cycle.
+8. If all actions in the sequence return SUCCESS, mark the cycle as complete and repeat the entire sequence until three cycles have been successfully executed.
+9. After completing three successful cycles, terminate the mission and return SUCCESS.
